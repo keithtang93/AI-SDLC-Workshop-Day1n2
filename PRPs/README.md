@@ -78,6 +78,24 @@ This directory contains detailed Product Requirement Prompts split by feature fo
     - Session management with JWT
     - Route protection middleware
 
+## 🧪 PRP → Test File Mapping
+
+Test files are ordered by **execution dependency** while PRPs are ordered by **implementation dependency**. That means authentication uses `tests/01-*`, while CRUD starts at `tests/02-*`.
+
+| PRP | Feature | Primary test file |
+|-----|---------|-------------------|
+| `01` | Todo CRUD | `tests/02-todo-crud.spec.ts` |
+| `02` | Priority System | `tests/03-priority-system.spec.ts` |
+| `03` | Recurring Todos | `tests/04-recurring-todos.spec.ts` |
+| `04` | Reminders & Notifications | `tests/05-reminders-notifications.spec.ts` |
+| `05` | Subtasks & Progress | `tests/06-subtasks-progress.spec.ts` |
+| `06` | Tag System | `tests/07-tag-system.spec.ts` |
+| `07` | Template System | `tests/08-template-system.spec.ts` |
+| `08` | Search & Filtering | `tests/09-search-filtering.spec.ts` |
+| `09` | Export & Import | `tests/10-export-import.spec.ts` |
+| `10` | Calendar View | `tests/11-calendar-view.spec.ts` |
+| `11` | Authentication | `tests/01-authentication.spec.ts` |
+
 ## 🎯 How to Use These PRPs
 
 ### For AI Coding Assistants (GitHub Copilot, etc.)
@@ -98,16 +116,21 @@ This directory contains detailed Product Requirement Prompts split by feature fo
 
 Each PRP follows this consistent structure:
 
-- **Feature Overview** - High-level description
-- **User Stories** - User personas and their needs
+- **Feature Overview** - High-level description and baseline project conventions
+- **Why This Feature Matters** - UX and business rationale
+- **User Stories** - Core and supporting user needs
+- **Canonical Acceptance Criteria** - Verbatim evaluation checklist items
 - **User Flow** - Step-by-step interaction patterns
-- **Technical Requirements** - Database schema, API endpoints, types
-- **UI Components** - React component examples
+- **Technical Requirements** - File ownership, data model, and validation rules
+- **API Contract** - Endpoints, request/response shape, and failure cases
+- **Frontend / UX Requirements** - Form behavior, layout, and user interactions
+- **Step-by-Step Implementation Plan** - Ordered implementation tasks
 - **Edge Cases** - Unusual scenarios and handling
-- **Acceptance Criteria** - Testable requirements
-- **Testing Requirements** - E2E and unit test specifications
+- **Testing Requirements** - E2E, unit, and verification commands
+- **Security and Quality Notes** - Input validation, auth scoping, and safety rules
 - **Out of Scope** - Explicitly excluded features
 - **Success Metrics** - Measurable outcomes
+- **Reference Sources** - Canonical supporting documentation
 
 ## 🔗 Related Documentation
 
@@ -171,7 +194,152 @@ Recommended implementation order:
 5. **Phase 5 - Infrastructure** (can be developed in parallel or last)
    - 11: Authentication (WebAuthn)
 
-## 🛠️ Technical Stack Reference
+## Step-by-Step PRP Authoring Plan
+
+This section is the working plan for creating the remaining PRP markdown files so that each one is implementation-ready for GitHub Copilot or any developer.
+
+### Phase 0 - Align on source of truth
+Before drafting any new PRP, always pull requirements from these sources in this order:
+
+1. `EVALUATION.md` - canonical implementation checklist, testing checklist, and acceptance criteria
+2. `USER_GUIDE.md` - expected user-facing behavior and UX details
+3. `.github/copilot-instructions.md` - project-specific technical rules, file ownership, and architecture constraints
+4. Existing `PRPs/01-todo-crud-operations.md` - formatting and depth reference
+
+### Standard PRP template for every file
+Every PRP from `02` to `11` should follow the same structure:
+
+- **Feature Overview**
+- **Why This Feature Matters**
+- **User Stories**
+- **Canonical Acceptance Criteria**
+- **User Flow**
+- **Technical Requirements**
+  - File ownership
+  - Data model
+  - Validation rules
+- **API Contract**
+- **Frontend / UX Requirements**
+- **Step-by-Step Implementation Plan**
+- **Edge Cases**
+- **Testing Requirements**
+- **Security and Quality Notes**
+- **Out of Scope**
+- **Success Metrics**
+- **Reference Sources**
+
+### Standard convention preamble
+Every PRP should open with the same baseline conventions block before adding feature-specific rules:
+
+- **Framework:** Next.js 16 App Router
+- **Database:** SQLite via `better-sqlite3` (synchronous)
+- **Auth:** WebAuthn / passkeys with JWT cookie sessions
+- **Timezone:** Singapore timezone only via `lib/timezone.ts`
+- **Main UI:** `app/page.tsx` is the primary client component
+- **DB Access:** `lib/db.ts` is the single source of truth
+
+### Scope discipline
+- Pull core requirements from `EVALUATION.md` first
+- If you include a nice-to-have idea, clearly mark it as **optional** or **stretch**
+- Keep optional enhancements separate from canonical acceptance criteria so implementation effort stays focused
+
+### Recommended authoring order
+
+| Order | File | Reason for priority | Minimum implementation content |
+|-------|------|---------------------|--------------------------------|
+| 1 | `02-priority-system.md` | Smallest dependency surface after CRUD | Priority enum, defaulting, badge colors, sorting, filter logic, tests |
+| 2 | `11-authentication-webauthn.md` | Shared auth pattern used across the app | WebAuthn flow, JWT sessions, middleware, login/register routes, tests |
+| 3 | `03-recurring-todos.md` | Extends todo completion logic from PRP 01 | Recurrence fields, due-date calculation, next-instance creation, inheritance rules |
+| 4 | `04-reminders-notifications.md` | Builds on due dates and recurring behavior | Notification hook, polling API, reminder timings, duplicate prevention |
+| 5 | `05-subtasks-progress.md` | Needed before templates and richer task views | Subtask CRUD, progress bar, cascade delete, position ordering |
+| 6 | `06-tag-system.md` | Enables search, organization, and export fidelity | Tag CRUD, color labels, many-to-many mapping, filter behavior |
+| 7 | `08-search-filtering.md` | Depends on priorities and tags being defined | Search UX, debounce, combined filters, empty states |
+| 8 | `07-template-system.md` | Depends on subtasks and recurrence details | Template CRUD, JSON serialization, due-date offsets, reuse flow |
+| 9 | `09-export-import.md` | Depends on todos, subtasks, and tags | Export schema, import validation, ID remapping, relationship preservation |
+| 10 | `10-calendar-view.md` | Depends on due dates and holiday data | Calendar grid, holiday API, due-date visualization, month navigation |
+
+### File-by-file drafting checklist
+
+#### `02-priority-system.md`
+- Define `high | medium | low` behavior and validation
+- Document badge colors and accessibility expectations
+- Specify sorting order and priority filter behavior
+- Add E2E coverage for create, edit, sort, and filter flows
+
+#### `03-recurring-todos.md`
+- Explain all four recurrence patterns: daily, weekly, monthly, yearly
+- Document how the next instance is created when the current todo is completed
+- State inherited metadata: priority, tags, reminder, recurrence settings
+- Cover Singapore-time date calculation edge cases such as month-end rollover
+
+#### `04-reminders-notifications.md`
+- Document the `useNotifications` hook and `/api/notifications/check`
+- Specify the seven supported reminder offsets
+- Describe permission request flow and one-time notification protection via `last_notification_sent`
+- Include manual and E2E verification guidance
+
+#### `05-subtasks-progress.md`
+- Define the `subtasks` table and cascade-delete relationship
+- Document create, update, toggle, and delete subtask endpoints
+- Specify progress formula and visual display requirements
+- Include testing for real-time progress updates
+
+#### `06-tag-system.md`
+- Define `tags` and `todo_tags` schema and uniqueness per user
+- Document tag management modal and color selection behavior
+- Specify tag assignment/removal and click-to-filter UX
+- Include duplicate-name validation and cleanup behavior on delete
+
+#### `07-template-system.md`
+- Define the `templates` table and JSON serialization format for subtasks
+- Document save-template and use-template flows
+- Explain due-date offset logic and category filtering
+- Include acceptance tests for recreating todos from a template
+
+#### `08-search-filtering.md`
+- Specify real-time search across title, subtasks, and tags
+- Document priority, tag, completion, and date-range filters
+- Define combined filter behavior and empty-state handling
+- Add notes for client-side performance and debounce
+
+#### `09-export-import.md`
+- Define JSON export shape and CSV expectations if supported
+- Document import validation, ID remapping, and relationship restoration
+- Explain how duplicate tags should be handled on import
+- Include tests for valid, invalid, and partial import scenarios
+
+#### `10-calendar-view.md`
+- Document `/calendar` page behavior and holiday integration
+- Specify month navigation, today shortcut, and click-day interactions
+- Explain how todos and Singapore public holidays are displayed in the grid
+- Include tests for month changes and date placement accuracy
+
+#### `11-authentication-webauthn.md`
+- Document registration and login option/verify route pairs
+- Explain JWT cookie sessions and route protection middleware
+- Call out `counter ?? 0` null safety and base64url credential handling
+- Include Playwright guidance using virtual authenticators
+
+### Definition of done for each PRP file
+A PRP is considered ready only when it:
+
+1. Covers every acceptance criterion from `EVALUATION.md` verbatim
+2. Matches the real UX described in `USER_GUIDE.md`
+3. References the correct files in the codebase (`lib/db.ts`, `app/api/**`, `app/page.tsx`, `tests/**`)
+4. Includes at least 5 relevant edge cases
+5. Contains clear implementation steps that a developer or AI assistant can follow without guessing
+6. Lists concrete testing requirements and verification commands
+7. Mentions Singapore timezone rules whenever dates or reminders are involved
+
+### Suggested execution rhythm
+
+- **Wave 1:** Write `02` and `11`
+- **Wave 2:** Write `03`, `04`, and `05`
+- **Wave 3:** Write `06` and `08`
+- **Wave 4:** Write `07`, `09`, and `10`
+- After each wave, review the new PRPs for consistency, cross-links, and missing acceptance criteria before moving on.
+
+## Technical Stack Reference
 
 All PRPs assume:
 - **Framework**: Next.js 16 (App Router)
@@ -200,6 +368,7 @@ When adding new PRPs:
 
 ---
 
-**Last Updated**: November 11, 2025
-**Total PRPs**: 11
+**Last Updated**: April 8, 2026
+**Total PRPs Listed**: 11
+**Current Authoring Status**: 11 drafted (`01`-`11`)
 **Total Features Documented**: 10 core application features + 1 infrastructure feature
