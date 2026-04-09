@@ -24,6 +24,24 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "Title is required" }, { status: 400 });
   }
 
+  if (body?.due_date) {
+    const due = new Date(body.due_date);
+    const now = new Date();
+    if (due.getTime() <= now.getTime() + 60000) {
+      return NextResponse.json(
+        { error: "Due date must be at least 1 minute in the future" },
+        { status: 400 },
+      );
+    }
+  }
+
+  if (body?.recurrence_pattern && !body?.due_date) {
+    return NextResponse.json(
+      { error: "Recurring todos require a due date" },
+      { status: 400 },
+    );
+  }
+
   const todo = todoDB.create({
     userId: session.userId,
     title,

@@ -76,7 +76,7 @@ export async function PUT(
     priority: body?.priority as Priority,
     dueDate: body?.due_date,
     completed:
-      typeof body?.completed === "boolean" ? body.completed : undefined,
+      body?.completed !== undefined ? Boolean(body.completed) : undefined,
     reminderMinutes: body?.reminder_minutes,
     recurrencePattern: body?.recurrence_pattern as RecurrencePattern | null,
     tagIds: Array.isArray(body?.tag_ids) ? body.tag_ids : undefined,

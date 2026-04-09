@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 
 interface TodoLite {
   id: number;
   title: string;
   due_date: string | null;
   completed: number;
+  priority: string;
 }
 
 interface Holiday {
@@ -22,10 +24,50 @@ function monthKey(date: Date): string {
   return `${y}-${m}`;
 }
 
+function parseMonthParam(param: string | null): Date | null {
+  if (!param) return null;
+  const match = param.match(/^(\d{4})-(\d{2})$/);
+  if (!match) return null;
+  const y = Number(match[1]);
+  const m = Number(match[2]) - 1;
+  if (m < 0 || m > 11) return null;
+  return new Date(y, m, 1);
+}
+
+const priorityColors: Record<string, string> = {
+  high: "text-red-600",
+  medium: "text-yellow-600",
+  low: "text-blue-600",
+};
+
 export default function CalendarPage() {
-  const [focus, setFocus] = useState<Date>(new Date());
+  return (
+    <Suspense
+      fallback={
+        <main className="mx-auto max-w-6xl p-6">
+          <p>Loading calendar...</p>
+        </main>
+      }
+    >
+      <CalendarContent />
+    </Suspense>
+  );
+}
+
+function CalendarContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const initialDate = parseMonthParam(searchParams.get("month")) ?? new Date();
+  const [focus, setFocus] = useState<Date>(initialDate);
   const [todos, setTodos] = useState<TodoLite[]>([]);
   const [holidays, setHolidays] = useState<Holiday[]>([]);
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
+
+  const updateFocus = (newDate: Date) => {
+    setFocus(newDate);
+    router.push(`/calendar?month=${monthKey(newDate)}`, { scroll: false });
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -93,6 +135,11 @@ export default function CalendarPage() {
     return map;
   }, [holidays]);
 
+  const selectedDayTodos = selectedDay ? (todoMap.get(selectedDay) ?? []) : [];
+  const selectedDayHoliday = selectedDay
+    ? holidayMap.get(selectedDay)
+    : undefined;
+
   return (
     <main className="mx-auto max-w-6xl p-6">
       <div className="mb-4 flex items-center justify-between">
@@ -103,14 +150,16 @@ export default function CalendarPage() {
           </Link>
           <button
             className="rounded bg-slate-900 px-3 py-2 text-sm text-white"
-            onClick={() => setFocus(new Date())}
+            onClick={() => updateFocus(new Date())}
           >
             Today
           </button>
           <button
             className="rounded bg-slate-200 px-3 py-2 text-sm"
             onClick={() =>
-              setFocus(new Date(focus.getFullYear(), focus.getMonth() - 1, 1))
+              updateFocus(
+                new Date(focus.getFullYear(), focus.getMonth() - 1, 1),
+              )
             }
           >
             Prev
@@ -118,7 +167,9 @@ export default function CalendarPage() {
           <button
             className="rounded bg-slate-200 px-3 py-2 text-sm"
             onClick={() =>
-              setFocus(new Date(focus.getFullYear(), focus.getMonth() + 1, 1))
+              updateFocus(
+                new Date(focus.getFullYear(), focus.getMonth() + 1, 1),
+              )
             }
           >
             Next
@@ -154,19 +205,34 @@ export default function CalendarPage() {
           const key = day.toISOString().slice(0, 10);
           const dayTodos = todoMap.get(key) ?? [];
           const holiday = holidayMap.get(key);
+          const isToday = key === new Date().toISOString().slice(0, 10);
+          const isWeekend = day.getDay() === 0 || day.getDay() === 6;
 
           return (
             <div
               key={idx}
-              className="h-28 rounded border bg-white p-2 shadow-sm"
+              onClick={() => setSelectedDay(key)}
+              className={`h-28 cursor-pointer rounded border p-2 shadow-sm transition hover:ring-2 hover:ring-slate-300 ${
+                isToday
+                  ? "border-blue-400 bg-blue-50"
+                  : isWeekend
+                    ? "bg-slate-50"
+                    : "bg-white"
+              }`}
             >
               <div className="flex items-start justify-between">
-                <span className="text-sm font-semibold">{day.getDate()}</span>
+                <span
+                  className={`text-sm font-semibold ${isToday ? "text-blue-600" : ""}`}
+                >
+                  {day.getDate()}
+                </span>
                 {holiday && <span title={holiday.name}>🇸🇬</span>}
               </div>
-              <p className="mt-2 text-xs text-slate-500">
-                {dayTodos.length} todos
-              </p>
+              {dayTodos.length > 0 && (
+                <p className="mt-1 text-xs font-medium text-slate-700">
+                  {dayTodos.length} todo{dayTodos.length > 1 ? "s" : ""}
+                </p>
+              )}
               {holiday && (
                 <p className="text-xs text-rose-600">{holiday.name}</p>
               )}
@@ -178,6 +244,63 @@ export default function CalendarPage() {
       <p className="mt-4 text-sm text-slate-500">
         Current month key: {monthKey(focus)}
       </p>
+
+      {/* Day Detail Modal */}
+      {selectedDay && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="mx-4 w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-xl font-semibold">
+                {new Date(selectedDay + "T00:00:00").toLocaleDateString(
+                  "en-SG",
+                  {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  },
+                )}
+              </h2>
+              <button
+                className="rounded bg-slate-200 px-3 py-1 text-sm"
+                onClick={() => setSelectedDay(null)}
+              >
+                Close
+              </button>
+            </div>
+            {selectedDayHoliday && (
+              <p className="mb-3 rounded bg-rose-50 px-3 py-2 text-sm text-rose-700">
+                🇸🇬 {selectedDayHoliday.name}
+              </p>
+            )}
+            {selectedDayTodos.length === 0 ? (
+              <p className="text-sm text-slate-500">
+                No todos scheduled for this day.
+              </p>
+            ) : (
+              <ul className="space-y-2">
+                {selectedDayTodos.map((todo) => (
+                  <li
+                    key={todo.id}
+                    className="flex items-center gap-2 rounded border p-2"
+                  >
+                    <span
+                      className={`text-sm ${todo.completed ? "line-through text-slate-400" : ""}`}
+                    >
+                      {todo.title}
+                    </span>
+                    <span
+                      className={`ml-auto text-xs font-medium ${priorityColors[todo.priority] ?? ""}`}
+                    >
+                      {todo.priority}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      )}
     </main>
   );
 }

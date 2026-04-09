@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
+import {
+  ChangeEvent,
+  FormEvent,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useNotifications } from "@/lib/hooks/useNotifications";
 
 type Priority = "high" | "medium" | "low";
@@ -35,6 +41,8 @@ interface Todo {
 interface Template {
   id: number;
   name: string;
+  description: string | null;
+  category: string | null;
 }
 
 const reminderOptions = [
@@ -47,6 +55,23 @@ const reminderOptions = [
   { label: "2 days before", value: "2880" },
   { label: "1 week before", value: "10080" },
 ];
+
+const priorityColors: Record<Priority, string> = {
+  high: "bg-red-100 text-red-700",
+  medium: "bg-yellow-100 text-yellow-700",
+  low: "bg-blue-100 text-blue-700",
+};
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+
+  return debouncedValue;
+}
 
 function progress(todo: Todo): {
   completed: number;
@@ -82,10 +107,30 @@ export default function HomePage() {
 
   const [newTagName, setNewTagName] = useState("");
   const [newTagColor, setNewTagColor] = useState("#3B82F6");
+  const [editingTag, setEditingTag] = useState<Tag | null>(null);
+  const [editTagName, setEditTagName] = useState("");
+  const [editTagColor, setEditTagColor] = useState("#3B82F6");
 
   const [newTemplateName, setNewTemplateName] = useState("");
+  const [newTemplateDescription, setNewTemplateDescription] = useState("");
+  const [newTemplateCategory, setNewTemplateCategory] = useState("");
+
+  const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editPriority, setEditPriority] = useState<Priority>("medium");
+  const [editDueDate, setEditDueDate] = useState("");
+  const [editRecurrence, setEditRecurrence] = useState<
+    RecurrencePattern | ""
+  >("");
+  const [editReminderMinutes, setEditReminderMinutes] = useState("");
+  const [editSelectedTags, setEditSelectedTags] = useState<number[]>([]);
+
+  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
 
   const { permission, requestPermission } = useNotifications();
+
+  const debouncedSearch = useDebounce(search, 300);
 
   const loadAll = async () => {
     const [todoRes, tagRes, templateRes] = await Promise.all([
@@ -115,7 +160,7 @@ export default function HomePage() {
   }, []);
 
   const filteredTodos = useMemo(() => {
-    const query = search.toLowerCase();
+    const query = debouncedSearch.toLowerCase();
     return todos.filter((todo) => {
       if (status === "complete" && todo.completed !== 1) return false;
       if (status === "incomplete" && todo.completed === 1) return false;
@@ -129,9 +174,25 @@ export default function HomePage() {
       const subtaskMatch = todo.subtasks.some((subtask) =>
         subtask.title.toLowerCase().includes(query),
       );
-      return titleMatch || subtaskMatch;
+      const tagMatch = todo.tags.some((tag) =>
+        tag.name.toLowerCase().includes(query),
+      );
+      return titleMatch || subtaskMatch || tagMatch;
     });
-  }, [todos, search, status, priorityFilter, tagFilter]);
+  }, [todos, debouncedSearch, status, priorityFilter, tagFilter]);
+
+  const hasActiveFilters =
+    debouncedSearch !== "" ||
+    status !== "all" ||
+    priorityFilter !== "all" ||
+    tagFilter !== null;
+
+  const clearAllFilters = () => {
+    setSearch("");
+    setStatus("all");
+    setPriorityFilter("all");
+    setTagFilter(null);
+  };
 
   const grouped = useMemo(() => {
     const overdue: Todo[] = [];
@@ -204,6 +265,47 @@ export default function HomePage() {
 
   const deleteTodo = async (id: number) => {
     await fetch(`/api/todos/${id}`, { method: "DELETE" });
+    setDeleteConfirmId(null);
+    await loadAll();
+  };
+
+  const openEditModal = (todo: Todo) => {
+    setEditingTodo(todo);
+    setEditTitle(todo.title);
+    setEditDescription(todo.description ?? "");
+    setEditPriority(todo.priority);
+    setEditDueDate(
+      todo.due_date
+        ? new Date(todo.due_date).toISOString().slice(0, 16)
+        : "",
+    );
+    setEditRecurrence(todo.recurrence_pattern ?? "");
+    setEditReminderMinutes(
+      todo.reminder_minutes !== null ? String(todo.reminder_minutes) : "",
+    );
+    setEditSelectedTags(todo.tags.map((tag) => tag.id));
+  };
+
+  const saveEdit = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!editingTodo) return;
+
+    await fetch(`/api/todos/${editingTodo.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: editTitle,
+        description: editDescription || null,
+        priority: editPriority,
+        due_date: editDueDate ? new Date(editDueDate).toISOString() : null,
+        recurrence_pattern: editRecurrence || null,
+        reminder_minutes: editReminderMinutes
+          ? Number(editReminderMinutes)
+          : null,
+        tag_ids: editSelectedTags,
+      }),
+    });
+    setEditingTodo(null);
     await loadAll();
   };
 
@@ -228,6 +330,11 @@ export default function HomePage() {
     await loadAll();
   };
 
+  const deleteSubtask = async (subtaskId: number) => {
+    await fetch(`/api/subtasks/${subtaskId}`, { method: "DELETE" });
+    await loadAll();
+  };
+
   const createTag = async (event: FormEvent) => {
     event.preventDefault();
     await fetch("/api/tags", {
@@ -239,6 +346,30 @@ export default function HomePage() {
     await loadAll();
   };
 
+  const startEditTag = (tag: Tag) => {
+    setEditingTag(tag);
+    setEditTagName(tag.name);
+    setEditTagColor(tag.color);
+  };
+
+  const saveTag = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!editingTag) return;
+    await fetch(`/api/tags/${editingTag.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: editTagName, color: editTagColor }),
+    });
+    setEditingTag(null);
+    await loadAll();
+  };
+
+  const deleteTag = async (tagId: number) => {
+    await fetch(`/api/tags/${tagId}`, { method: "DELETE" });
+    if (tagFilter === tagId) setTagFilter(null);
+    await loadAll();
+  };
+
   const saveTemplate = async () => {
     if (!newTemplateName.trim()) return;
     await fetch("/api/templates", {
@@ -246,8 +377,9 @@ export default function HomePage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name: newTemplateName,
+        description: newTemplateDescription || null,
+        category: newTemplateCategory || null,
         title,
-        description,
         priority,
         reminder_minutes: reminderMinutes ? Number(reminderMinutes) : null,
         recurrence_pattern: recurrence || null,
@@ -256,6 +388,8 @@ export default function HomePage() {
       }),
     });
     setNewTemplateName("");
+    setNewTemplateDescription("");
+    setNewTemplateCategory("");
     await loadAll();
   };
 
@@ -433,12 +567,24 @@ export default function HomePage() {
           </button>
         </form>
 
-        <div className="mt-3 flex gap-2">
+        <div className="mt-3 flex flex-wrap gap-2">
           <input
             className="rounded border px-3 py-2"
             placeholder="Template name"
             value={newTemplateName}
             onChange={(e) => setNewTemplateName(e.target.value)}
+          />
+          <input
+            className="rounded border px-3 py-2"
+            placeholder="Template notes"
+            value={newTemplateDescription}
+            onChange={(e) => setNewTemplateDescription(e.target.value)}
+          />
+          <input
+            className="rounded border px-3 py-2"
+            placeholder="Category (optional)"
+            value={newTemplateCategory}
+            onChange={(e) => setNewTemplateCategory(e.target.value)}
           />
           <button
             className="rounded bg-emerald-600 px-3 py-2 text-white"
@@ -455,6 +601,7 @@ export default function HomePage() {
             {templates.map((template) => (
               <option key={template.id} value={template.id}>
                 {template.name}
+                {template.category ? ` [${template.category}]` : ""}
               </option>
             ))}
           </select>
@@ -490,14 +637,106 @@ export default function HomePage() {
             Create tag
           </button>
         </form>
+        {tags.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {tags.map((tag) => (
+              <div
+                key={tag.id}
+                className="flex items-center gap-1 rounded px-2 py-1 text-xs text-white"
+                style={{ backgroundColor: tag.color }}
+              >
+                <span>{tag.name}</span>
+                <button
+                  onClick={() => startEditTag(tag)}
+                  className="ml-1 rounded bg-white/30 px-1 hover:bg-white/50"
+                  title="Edit tag"
+                >
+                  ✏️
+                </button>
+                <button
+                  onClick={() => deleteTag(tag.id)}
+                  className="rounded bg-white/30 px-1 hover:bg-white/50"
+                  title="Delete tag"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        {editingTag && (
+          <form onSubmit={saveTag} className="mt-3 flex flex-wrap gap-2 rounded border p-2">
+            <span className="text-sm font-medium self-center">Edit tag:</span>
+            <input
+              className="rounded border px-3 py-2"
+              placeholder="Tag name"
+              value={editTagName}
+              onChange={(e) => setEditTagName(e.target.value)}
+              required
+            />
+            <input
+              type="color"
+              value={editTagColor}
+              onChange={(e) => setEditTagColor(e.target.value)}
+              className="h-10 w-14 rounded border"
+            />
+            <button
+              className="rounded bg-slate-900 px-4 py-2 text-white"
+              type="submit"
+            >
+              Save
+            </button>
+            <button
+              type="button"
+              className="rounded bg-slate-200 px-4 py-2"
+              onClick={() => setEditingTag(null)}
+            >
+              Cancel
+            </button>
+          </form>
+        )}
       </section>
 
       <section className="mb-6 rounded-xl bg-white p-4 shadow">
-        <h2 className="mb-2 text-xl font-semibold">Search & Filters</h2>
+        <div className="mb-2 flex items-center justify-between">
+          <h2 className="text-xl font-semibold">Search & Filters</h2>
+          {hasActiveFilters && (
+            <button
+              onClick={clearAllFilters}
+              className="rounded bg-rose-100 px-3 py-1 text-xs font-medium text-rose-700"
+            >
+              Clear All Filters
+            </button>
+          )}
+        </div>
+        {hasActiveFilters && (
+          <div className="mb-2 flex flex-wrap gap-2 text-xs">
+            {debouncedSearch && (
+              <span className="rounded bg-slate-100 px-2 py-1">
+                Search: &quot;{debouncedSearch}&quot;
+              </span>
+            )}
+            {status !== "all" && (
+              <span className="rounded bg-slate-100 px-2 py-1">
+                Status: {status}
+              </span>
+            )}
+            {priorityFilter !== "all" && (
+              <span className="rounded bg-slate-100 px-2 py-1">
+                Priority: {priorityFilter}
+              </span>
+            )}
+            {tagFilter && (
+              <span className="rounded bg-slate-100 px-2 py-1">
+                Tag: {tags.find((t) => t.id === tagFilter)?.name}
+              </span>
+            )}
+          </div>
+        )}
         <div className="grid gap-2 md:grid-cols-4">
           <input
             className="rounded border px-3 py-2"
-            placeholder="Search todos or subtasks"
+            placeholder="Search todos, subtasks, or tags"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -568,7 +807,9 @@ export default function HomePage() {
                         </p>
                       )}
                       <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                        <span className="rounded bg-slate-100 px-2 py-1">
+                        <span
+                          className={`rounded px-2 py-1 font-medium ${priorityColors[todo.priority]}`}
+                        >
                           {todo.priority}
                         </span>
                         {todo.due_date && (
@@ -589,13 +830,15 @@ export default function HomePage() {
                       </div>
                       <div className="mt-2 flex flex-wrap gap-2">
                         {todo.tags.map((tag) => (
-                          <span
+                          <button
                             key={tag.id}
-                            className="rounded px-2 py-1 text-xs text-white"
+                            onClick={() => setTagFilter(tag.id)}
+                            className="rounded px-2 py-1 text-xs text-white cursor-pointer hover:opacity-80"
                             style={{ backgroundColor: tag.color }}
+                            title={`Filter by tag: ${tag.name}`}
                           >
                             {tag.name}
-                          </span>
+                          </button>
                         ))}
                       </div>
                     </div>
@@ -612,17 +855,40 @@ export default function HomePage() {
                         {todo.completed ? "Mark Active" : "Complete"}
                       </button>
                       <button
+                        className="rounded bg-slate-100 px-3 py-2 text-xs"
+                        onClick={() => openEditModal(todo)}
+                      >
+                        Edit
+                      </button>
+                      <button
                         className="rounded bg-amber-100 px-3 py-2 text-xs"
                         onClick={() => addSubtask(todo.id)}
                       >
                         Add Subtask
                       </button>
-                      <button
-                        className="rounded bg-rose-100 px-3 py-2 text-xs text-rose-700"
-                        onClick={() => deleteTodo(todo.id)}
-                      >
-                        Delete
-                      </button>
+                      {deleteConfirmId === todo.id ? (
+                        <div className="flex gap-1">
+                          <button
+                            className="rounded bg-rose-600 px-3 py-2 text-xs text-white"
+                            onClick={() => deleteTodo(todo.id)}
+                          >
+                            Confirm
+                          </button>
+                          <button
+                            className="rounded bg-slate-200 px-3 py-2 text-xs"
+                            onClick={() => setDeleteConfirmId(null)}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          className="rounded bg-rose-100 px-3 py-2 text-xs text-rose-700"
+                          onClick={() => setDeleteConfirmId(todo.id)}
+                        >
+                          Delete
+                        </button>
+                      )}
                     </div>
                   </div>
 
@@ -648,14 +914,21 @@ export default function HomePage() {
                             onChange={() => toggleSubtask(subtask)}
                           />
                           <span
-                            className={
+                            className={`flex-1 ${
                               subtask.completed
                                 ? "line-through text-slate-400"
                                 : ""
-                            }
+                            }`}
                           >
                             {subtask.title}
                           </span>
+                          <button
+                            onClick={() => deleteSubtask(subtask.id)}
+                            className="rounded bg-rose-50 px-2 py-0.5 text-xs text-rose-600 hover:bg-rose-100"
+                            title="Delete subtask"
+                          >
+                            ✕
+                          </button>
                         </li>
                       ))}
                     </ul>
@@ -671,6 +944,114 @@ export default function HomePage() {
           </div>
         </section>
       ))}
+
+      {/* Edit Todo Modal */}
+      {editingTodo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="mx-4 w-full max-w-lg rounded-xl bg-white p-6 shadow-xl">
+            <h2 className="mb-4 text-xl font-semibold">Edit Todo</h2>
+            <form onSubmit={saveEdit} className="grid gap-3">
+              <input
+                className="rounded border px-3 py-2"
+                placeholder="Title"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                required
+              />
+              <input
+                className="rounded border px-3 py-2"
+                placeholder="Description"
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+              />
+              <select
+                className="rounded border px-3 py-2"
+                value={editPriority}
+                onChange={(e) => setEditPriority(e.target.value as Priority)}
+              >
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+              <input
+                type="datetime-local"
+                className="rounded border px-3 py-2"
+                value={editDueDate}
+                onChange={(e) => setEditDueDate(e.target.value)}
+              />
+              <select
+                className="rounded border px-3 py-2"
+                value={editRecurrence}
+                onChange={(e) =>
+                  setEditRecurrence(
+                    e.target.value as RecurrencePattern | "",
+                  )
+                }
+              >
+                <option value="">No recurrence</option>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+              </select>
+              <select
+                className="rounded border px-3 py-2"
+                value={editReminderMinutes}
+                onChange={(e) => setEditReminderMinutes(e.target.value)}
+              >
+                {reminderOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <div>
+                <p className="mb-1 text-sm font-medium">Tags</p>
+                <div className="flex flex-wrap gap-2">
+                  {tags.map((tag) => {
+                    const selected = editSelectedTags.includes(tag.id);
+                    return (
+                      <button
+                        type="button"
+                        key={tag.id}
+                        onClick={() =>
+                          setEditSelectedTags((prev) =>
+                            selected
+                              ? prev.filter((id) => id !== tag.id)
+                              : [...prev, tag.id],
+                          )
+                        }
+                        className={`rounded px-2 py-1 text-xs font-medium ${selected ? "ring-2 ring-slate-900" : ""}`}
+                        style={{
+                          backgroundColor: tag.color,
+                          color: "#fff",
+                        }}
+                      >
+                        {tag.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  className="rounded bg-slate-200 px-4 py-2"
+                  onClick={() => setEditingTodo(null)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="rounded bg-slate-900 px-4 py-2 text-white"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

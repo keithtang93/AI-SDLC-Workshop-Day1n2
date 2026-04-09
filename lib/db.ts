@@ -1,8 +1,14 @@
 import Database from "better-sqlite3";
+import fs from "node:fs";
 import path from "node:path";
 import { getSingaporeNow } from "@/lib/timezone";
 
-const dbPath = path.join(process.cwd(), "todos.db");
+const dbDir = process.env.RAILWAY_VOLUME_MOUNT_PATH || process.cwd();
+if (!fs.existsSync(dbDir)) {
+  fs.mkdirSync(dbDir, { recursive: true });
+}
+
+const dbPath = path.join(dbDir, "todos.db");
 const db = new Database(dbPath);
 db.pragma("foreign_keys = ON");
 
@@ -162,10 +168,53 @@ function initSchema(): void {
       name TEXT NOT NULL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+
+    -- Indexes on foreign keys and user_id columns
+    CREATE INDEX IF NOT EXISTS idx_authenticators_user_id ON authenticators(user_id);
+    CREATE INDEX IF NOT EXISTS idx_todos_user_id ON todos(user_id);
+    CREATE INDEX IF NOT EXISTS idx_subtasks_todo_id ON subtasks(todo_id);
+    CREATE INDEX IF NOT EXISTS idx_tags_user_id ON tags(user_id);
+    CREATE INDEX IF NOT EXISTS idx_todo_tags_tag_id ON todo_tags(tag_id);
+    CREATE INDEX IF NOT EXISTS idx_templates_user_id ON templates(user_id);
+
+    -- Index on due_date for filtering and calendar queries
+    CREATE INDEX IF NOT EXISTS idx_todos_due_date ON todos(due_date);
   `);
 }
 
 initSchema();
+
+function seedHolidays(): void {
+  const count = db.prepare("SELECT COUNT(*) as cnt FROM holidays").get() as {
+    cnt: number;
+  };
+  if (count.cnt > 0) return;
+
+  const holidays = [
+    { date: "2026-01-01", name: "New Year's Day" },
+    { date: "2026-02-17", name: "Chinese New Year" },
+    { date: "2026-02-18", name: "Chinese New Year Holiday" },
+    { date: "2026-03-20", name: "Hari Raya Puasa" },
+    { date: "2026-04-03", name: "Good Friday" },
+    { date: "2026-05-01", name: "Labour Day" },
+    { date: "2026-05-31", name: "Vesak Day" },
+    { date: "2026-08-09", name: "National Day" },
+    { date: "2026-11-08", name: "Deepavali" },
+    { date: "2026-12-25", name: "Christmas Day" },
+  ];
+
+  const insert = db.prepare(
+    "INSERT INTO holidays (date, name) VALUES (?, ?) ON CONFLICT(date) DO UPDATE SET name = excluded.name",
+  );
+  const insertAll = db.transaction(() => {
+    for (const h of holidays) {
+      insert.run(h.date, h.name);
+    }
+  });
+  insertAll();
+}
+
+seedHolidays();
 
 function withTodoRelations(todo: Todo): Todo {
   const tags = db
@@ -523,6 +572,50 @@ export const templateDB = {
     return db
       .prepare("SELECT * FROM templates WHERE id = ? AND user_id = ?")
       .get(id, userId) as Template | undefined;
+  },
+  update(
+    userId: number,
+    id: number,
+    input: Partial<{
+      name: string;
+      category: string | null;
+      title: string;
+      description: string | null;
+      priority: Priority;
+      reminderMinutes: number | null;
+      recurrencePattern: RecurrencePattern | null;
+      tagsJson: string;
+      subtasksJson: string;
+    }>,
+  ): Template | undefined {
+    const existing = db
+      .prepare("SELECT * FROM templates WHERE id = ? AND user_id = ?")
+      .get(id, userId) as Template | undefined;
+    if (!existing) return undefined;
+
+    db.prepare(
+      `UPDATE templates
+       SET name = ?, category = ?, title = ?, description = ?, priority = ?,
+           reminder_minutes = ?, recurrence_pattern = ?, tags_json = ?, subtasks_json = ?,
+           updated_at = CURRENT_TIMESTAMP
+       WHERE id = ? AND user_id = ?`,
+    ).run(
+      input.name ?? existing.name,
+      input.category ?? existing.category,
+      input.title ?? existing.title,
+      input.description ?? existing.description,
+      input.priority ?? existing.priority,
+      input.reminderMinutes ?? existing.reminder_minutes,
+      input.recurrencePattern ?? existing.recurrence_pattern,
+      input.tagsJson ?? existing.tags_json,
+      input.subtasksJson ?? existing.subtasks_json,
+      id,
+      userId,
+    );
+
+    return db
+      .prepare("SELECT * FROM templates WHERE id = ?")
+      .get(id) as Template;
   },
   delete(userId: number, id: number): void {
     db.prepare("DELETE FROM templates WHERE id = ? AND user_id = ?").run(
