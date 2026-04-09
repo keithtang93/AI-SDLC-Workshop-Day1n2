@@ -36,8 +36,8 @@ RUN chown -R nextjs:nodejs /app
 
 ENV HOSTNAME=0.0.0.0
 
-USER nextjs
-
 EXPOSE 3000
 
+# Run as root so Railway volume mounts are writable
+# Railway volumes are mounted as root; a non-root user cannot write to them
 CMD ["node", "server.js"]
