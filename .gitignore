@@ -1,0 +1,30 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+out/
+
+# production
+build/
+
+# env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# debug
+npm-debug.log*
+
+# database
+todos.db
+
+# testing
+test-results/
+playwright-report/
+
+# misc
+.DS_Store
+*.tsbuildinfo
