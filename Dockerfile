@@ -23,14 +23,22 @@ RUN adduser --system --uid 1001 nextjs
 # Copy standalone output
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/public ./public 2>/dev/null || true
 
-# Copy better-sqlite3 native addon (required at runtime)
+# Copy better-sqlite3 native addon and its dependencies (required at runtime)
 COPY --from=builder /app/node_modules/better-sqlite3 ./node_modules/better-sqlite3
 COPY --from=builder /app/node_modules/bindings ./node_modules/bindings
 COPY --from=builder /app/node_modules/file-uri-to-path ./node_modules/file-uri-to-path
-COPY --from=builder /app/node_modules/prebuild-install ./node_modules/prebuild-install 2>/dev/null || true
-COPY --from=builder /app/node_modules/node-addon-api ./node_modules/node-addon-api 2>/dev/null || true
+
+# Copy optional native addon helpers if they exist
+RUN --mount=from=builder,source=/app,target=/builder \
+    for pkg in node-addon-api prebuild-install public; do \
+      if [ -d "/builder/node_modules/$pkg" ]; then \
+        cp -r "/builder/node_modules/$pkg" "./node_modules/$pkg"; \
+      fi; \
+    done; \
+    if [ -d "/builder/public" ]; then \
+      cp -r /builder/public ./public; \
+    fi
 
 # Create data directory for SQLite persistence (mount a volume here)
 RUN mkdir -p /data && chown nextjs:nodejs /data
