@@ -2,9 +2,9 @@
 FROM node:18-alpine AS deps
 RUN apk add --no-cache python3 make g++ libc6-compat
 WORKDIR /app
-COPY package.json package-lock.json* ./
-# Use npm install (not ci) to resolve platform-specific optional deps
-# (npm ci doesn't install Alpine/musl native bindings from a macOS lockfile)
+# Only copy package.json (no lockfile) so npm resolves platform-native
+# bindings (e.g. @tailwindcss/oxide-linux-x64-musl) fresh for Alpine
+COPY package.json ./
 RUN npm install
 
 # ---- Stage 2: Build the application ----

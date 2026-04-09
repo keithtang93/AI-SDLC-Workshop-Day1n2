@@ -36,7 +36,9 @@ test.describe("Feature 01: Todo CRUD Operations", () => {
     });
 
     await expect(page.getByText("Full metadata todo")).toBeVisible();
-    const article = page.locator("article").filter({ hasText: "Full metadata todo" });
+    const article = page
+      .locator("article")
+      .filter({ hasText: "Full metadata todo" });
     await expect(article.getByText("A detailed description")).toBeVisible();
     await expect(article.getByText("high", { exact: true })).toBeVisible();
   });
@@ -95,7 +97,9 @@ test.describe("Feature 01: Todo CRUD Operations", () => {
   });
 
   test("empty state shows 'No todos in this section'", async ({ page }) => {
-    await expect(page.getByText("No todos in this section.").first()).toBeVisible();
+    await expect(
+      page.getByText("No todos in this section.").first(),
+    ).toBeVisible();
   });
 
   test("create form resets after submission", async ({ page }) => {
@@ -116,7 +120,9 @@ test.describe("Feature 01: Todo CRUD Operations", () => {
     await editBtn.click();
 
     // Edit modal should appear
-    await expect(page.getByRole("heading", { name: "Edit Todo" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Edit Todo" }),
+    ).toBeVisible();
 
     // Change the title
     const titleInput = page.locator(".fixed input").first();

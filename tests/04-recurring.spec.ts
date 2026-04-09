@@ -16,7 +16,9 @@ test.describe("Feature 03: Recurring Todos", () => {
       recurrence: "daily",
     });
 
-    const article = page.locator("article").filter({ hasText: "Daily recurring" });
+    const article = page
+      .locator("article")
+      .filter({ hasText: "Daily recurring" });
     await expect(article.getByText("repeat: daily")).toBeVisible();
   });
 
@@ -30,7 +32,9 @@ test.describe("Feature 03: Recurring Todos", () => {
       recurrence: "weekly",
     });
 
-    const article = page.locator("article").filter({ hasText: "Weekly recurring" });
+    const article = page
+      .locator("article")
+      .filter({ hasText: "Weekly recurring" });
     await expect(article.getByText("repeat: weekly")).toBeVisible();
   });
 
@@ -52,7 +56,9 @@ test.describe("Feature 03: Recurring Todos", () => {
     await page.waitForTimeout(1000);
 
     // After completing, a new active instance should exist + the completed one
-    const articles = page.locator("article").filter({ hasText: "Recur complete test" });
+    const articles = page
+      .locator("article")
+      .filter({ hasText: "Recur complete test" });
     await expect(articles).toHaveCount(2);
   });
 
@@ -96,7 +102,9 @@ test.describe("Feature 03: Recurring Todos", () => {
       .locator("article")
       .filter({ hasText: "Inherit meta test" });
 
-    await expect(activeArticle.getByText("high", { exact: true })).toBeVisible();
+    await expect(
+      activeArticle.getByText("high", { exact: true }),
+    ).toBeVisible();
     await expect(activeArticle.getByText("repeat: daily")).toBeVisible();
     await expect(activeArticle.getByText("reminder: 60m")).toBeVisible();
   });

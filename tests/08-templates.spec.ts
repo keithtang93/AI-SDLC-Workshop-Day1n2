@@ -14,7 +14,9 @@ test.describe("Feature 07: Template System", () => {
 
     // Template should appear in the template dropdown
     // Verify the template exists in the dropdown by checking it has the option
-    const templateSelect = page.locator("select").filter({ hasText: "Use template..." });
+    const templateSelect = page
+      .locator("select")
+      .filter({ hasText: "Use template..." });
     await expect(templateSelect).toContainText("My Template");
   });
 
@@ -28,7 +30,9 @@ test.describe("Feature 07: Template System", () => {
     await page.waitForTimeout(500);
 
     // Use the template
-    const templateSelect = page.locator("select").filter({ hasText: "Use template..." });
+    const templateSelect = page
+      .locator("select")
+      .filter({ hasText: "Use template..." });
     await templateSelect.selectOption({ label: "Reuse Me" });
     await page.waitForTimeout(1000);
 
@@ -56,12 +60,16 @@ test.describe("Feature 07: Template System", () => {
     await page.waitForTimeout(500);
 
     // Use the template
-    const templateSelect = page.locator("select").filter({ hasText: "Use template..." });
+    const templateSelect = page
+      .locator("select")
+      .filter({ hasText: "Use template..." });
     await templateSelect.selectOption({ label: "High Priority Template" });
     await page.waitForTimeout(1000);
 
     // The created todo should have high priority
-    const article = page.locator("article").filter({ hasText: "High priority task" });
+    const article = page
+      .locator("article")
+      .filter({ hasText: "High priority task" });
     await expect(article.getByText("high", { exact: true })).toBeVisible();
   });
 
@@ -75,7 +83,9 @@ test.describe("Feature 07: Template System", () => {
     await page.waitForTimeout(500);
 
     // Select the template in preview dropdown
-    const previewSelect = page.locator("select").filter({ hasText: "Preview template..." });
+    const previewSelect = page
+      .locator("select")
+      .filter({ hasText: "Preview template..." });
     await previewSelect.selectOption({ label: "Preview Template" });
 
     // Template preview should be visible
@@ -118,7 +128,9 @@ test.describe("Feature 07: Template System", () => {
     // Get templates
     const listResponse = await page.request.get("/api/templates");
     const { templates } = await listResponse.json();
-    const template = templates.find((t: any) => t.name === "Deletable Template");
+    const template = templates.find(
+      (t: any) => t.name === "Deletable Template",
+    );
     expect(template).toBeTruthy();
 
     // Delete via API
@@ -128,7 +140,9 @@ test.describe("Feature 07: Template System", () => {
     // Verify it's gone
     const afterResponse = await page.request.get("/api/templates");
     const afterData = await afterResponse.json();
-    const found = afterData.templates.find((t: any) => t.name === "Deletable Template");
+    const found = afterData.templates.find(
+      (t: any) => t.name === "Deletable Template",
+    );
     expect(found).toBeUndefined();
   });
 });

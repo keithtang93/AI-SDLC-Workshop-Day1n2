@@ -62,7 +62,9 @@ test.describe("Feature 05: Subtasks & Progress Tracking", () => {
       await dialog.accept(`Subtask ${dialogCount}`);
     });
 
-    const article = page.locator("article").filter({ hasText: "Progress parent" });
+    const article = page
+      .locator("article")
+      .filter({ hasText: "Progress parent" });
     const addBtn = article.getByRole("button", { name: "Add Subtask" });
 
     await addBtn.click();
@@ -106,7 +108,9 @@ test.describe("Feature 05: Subtasks & Progress Tracking", () => {
     await expect(page.getByText("Subtask to delete")).toBeVisible();
 
     // Click the delete button (✕) on the subtask
-    const article = page.locator("article").filter({ hasText: "Delete subtask parent" });
+    const article = page
+      .locator("article")
+      .filter({ hasText: "Delete subtask parent" });
     const deleteBtn = article.locator('button[title="Delete subtask"]');
     await deleteBtn.click();
     await page.waitForTimeout(500);

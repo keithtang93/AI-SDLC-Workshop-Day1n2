@@ -10,7 +10,9 @@ test.describe("Feature 08: Search & Filtering", () => {
     await createTodo(page, { title: "Unique apple todo" });
     await createTodo(page, { title: "Unique banana todo" });
 
-    await page.getByPlaceholder("Search todos, subtasks, or tags").fill("apple");
+    await page
+      .getByPlaceholder("Search todos, subtasks, or tags")
+      .fill("apple");
 
     await expect(page.getByText("Unique apple todo")).toBeVisible();
     await expect(page.getByText("Unique banana todo")).not.toBeVisible();
@@ -19,7 +21,9 @@ test.describe("Feature 08: Search & Filtering", () => {
   test("search is case-insensitive", async ({ page }) => {
     await createTodo(page, { title: "Case Test Item" });
 
-    await page.getByPlaceholder("Search todos, subtasks, or tags").fill("case test");
+    await page
+      .getByPlaceholder("Search todos, subtasks, or tags")
+      .fill("case test");
 
     await expect(page.getByText("Case Test Item")).toBeVisible();
   });
@@ -37,7 +41,9 @@ test.describe("Feature 08: Search & Filtering", () => {
     await page.waitForTimeout(500);
 
     // Status filter is the 1st select (index 0)
-    const filterSection = page.locator("section").filter({ hasText: "Search & Filters" });
+    const filterSection = page
+      .locator("section")
+      .filter({ hasText: "Search & Filters" });
     await filterSection.locator("select").nth(0).selectOption("complete");
 
     await expect(page.getByText("Status done todo xk7")).toBeVisible();
@@ -49,7 +55,9 @@ test.describe("Feature 08: Search & Filtering", () => {
     await createTodo(page, { title: "Filter low", priority: "low" });
 
     // Priority filter is the 2nd select (index 1)
-    const filterSection = page.locator("section").filter({ hasText: "Search & Filters" });
+    const filterSection = page
+      .locator("section")
+      .filter({ hasText: "Search & Filters" });
     await filterSection.locator("select").nth(1).selectOption("low");
 
     await expect(page.getByText("Filter low")).toBeVisible();
@@ -60,7 +68,9 @@ test.describe("Feature 08: Search & Filtering", () => {
     await createTodo(page, { title: "Show me alpha" });
     await createTodo(page, { title: "Show me beta" });
 
-    await page.getByPlaceholder("Search todos, subtasks, or tags").fill("alpha");
+    await page
+      .getByPlaceholder("Search todos, subtasks, or tags")
+      .fill("alpha");
     await expect(page.getByText("Show me beta")).not.toBeVisible();
 
     await page.getByPlaceholder("Search todos, subtasks, or tags").fill("");
@@ -69,8 +79,12 @@ test.describe("Feature 08: Search & Filtering", () => {
   });
 
   test("empty results show no todos message", async ({ page }) => {
-    await page.getByPlaceholder("Search todos, subtasks, or tags").fill("nonexistent_xyz_123");
-    await expect(page.getByText("No todos in this section.").first()).toBeVisible();
+    await page
+      .getByPlaceholder("Search todos, subtasks, or tags")
+      .fill("nonexistent_xyz_123");
+    await expect(
+      page.getByText("No todos in this section.").first(),
+    ).toBeVisible();
   });
 
   test("search by tag name", async ({ page }) => {
@@ -80,7 +94,9 @@ test.describe("Feature 08: Search & Filtering", () => {
     await createTodo(page, { title: "Tag search parent" });
 
     // Search by tag name
-    await page.getByPlaceholder("Search todos, subtasks, or tags").fill("SearchableTag");
+    await page
+      .getByPlaceholder("Search todos, subtasks, or tags")
+      .fill("SearchableTag");
     await page.waitForTimeout(500);
 
     await expect(page.getByText("Tag search parent")).toBeVisible();
@@ -92,11 +108,15 @@ test.describe("Feature 08: Search & Filtering", () => {
     await createTodo(page, { title: "Combined high beta", priority: "high" });
 
     // Set priority filter to high
-    const filterSection = page.locator("section").filter({ hasText: "Search & Filters" });
+    const filterSection = page
+      .locator("section")
+      .filter({ hasText: "Search & Filters" });
     await filterSection.locator("select").nth(1).selectOption("high");
 
     // Search for alpha
-    await page.getByPlaceholder("Search todos, subtasks, or tags").fill("alpha");
+    await page
+      .getByPlaceholder("Search todos, subtasks, or tags")
+      .fill("alpha");
     await page.waitForTimeout(500);
 
     // Only "Combined high alpha" should be visible

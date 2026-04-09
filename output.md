@@ -8,9 +8,11 @@
 ## Core Features Evaluation
 
 ### Feature 01: Todo CRUD Operations
+
 **Status:** ✅ Complete
 
 **Implementation Checklist:**
+
 - [x] Database schema created with all required fields
 - [x] API endpoint: `POST /api/todos` (create)
 - [x] API endpoint: `GET /api/todos` (read all)
@@ -28,6 +30,7 @@
 - [ ] Optimistic UI updates — uses `loadAll()` reload instead of true optimistic update
 
 **Testing:**
+
 - [x] E2E test: Create todo with title only
 - [x] E2E test: Create todo with all metadata
 - [x] E2E test: Edit todo via edit modal
@@ -36,6 +39,7 @@
 - [x] E2E test: Past due date validation
 
 **Acceptance Criteria:**
+
 - [x] Can create todo with just title
 - [x] Can create todo with priority, due date, recurring, reminder
 - [x] Todos sorted by priority and due date
@@ -47,9 +51,11 @@
 ---
 
 ### Feature 02: Priority System
+
 **Status:** ✅ Complete
 
 **Implementation Checklist:**
+
 - [x] Database: `priority` field added to todos table
 - [x] Type definition: `type Priority = 'high' | 'medium' | 'low'`
 - [x] Priority validation in API routes
@@ -61,6 +67,7 @@
 - [ ] Dark mode color compatibility — not verified
 
 **Testing:**
+
 - [x] E2E test: Create todo with each priority level
 - [x] E2E test: Edit priority via edit modal
 - [x] E2E test: Filter by priority
@@ -68,6 +75,7 @@
 - [ ] Visual test: Badge colors in light/dark mode
 
 **Acceptance Criteria:**
+
 - [x] Three priority levels functional
 - [x] Color-coded badges visible
 - [x] Automatic sorting by priority works (high→medium→low)
@@ -79,9 +87,11 @@
 ---
 
 ### Feature 03: Recurring Todos
+
 **Status:** ✅ Complete
 
 **Implementation Checklist:**
+
 - [x] Database: `recurrence_pattern` field (no separate `is_recurring`)
 - [x] Type: `type RecurrencePattern = 'daily' | 'weekly' | 'monthly' | 'yearly'`
 - [x] Validation: Recurring todos require due date
@@ -92,6 +102,7 @@
 - [x] Recurrence badge display with pattern name
 
 **Testing:**
+
 - [x] E2E test: Create daily recurring todo
 - [x] E2E test: Create weekly recurring todo
 - [x] E2E test: Complete recurring todo creates next instance
@@ -100,6 +111,7 @@
 - [x] Unit test: Due date calculations for each pattern (16 tests)
 
 **Acceptance Criteria:**
+
 - [x] All four patterns work correctly
 - [x] Next instance created on completion
 - [x] Metadata inherited properly
@@ -111,9 +123,11 @@
 ---
 
 ### Feature 04: Reminders & Notifications
+
 **Status:** ✅ Complete
 
 **Implementation Checklist:**
+
 - [x] Database: `reminder_minutes` and `last_notification_sent` fields
 - [x] Custom hook: `useNotifications` in `lib/hooks/`
 - [x] API endpoint: `GET /api/notifications/check`
@@ -126,12 +140,14 @@
 - [x] Reminder badge display with timing
 
 **Testing:**
+
 - [x] E2E test: Set reminder on todo
 - [x] E2E test: Reminder badge displays correctly
 - [x] E2E test: API returns todos needing notification
 - [x] Unit test: Reminder time calculation (17 tests, Singapore timezone)
 
 **Acceptance Criteria:**
+
 - [x] Permission request works
 - [x] All 7 timing options available
 - [x] Notifications fire at correct time
@@ -143,9 +159,11 @@
 ---
 
 ### Feature 05: Subtasks & Progress Tracking
+
 **Status:** ✅ Complete
 
 **Implementation Checklist:**
+
 - [x] Database: `subtasks` table with CASCADE delete
 - [x] API endpoint: `POST /api/todos/[id]/subtasks`
 - [x] API endpoint: `PUT /api/subtasks/[id]`
@@ -155,11 +173,12 @@
 - [x] Subtask checkboxes
 - [x] Delete subtask button
 - [x] Progress bar component
-- [x] Progress calculation (completed/total * 100)
+- [x] Progress calculation (completed/total \* 100)
 - [x] Progress display: "X/Y completed (Z%)"
 - [x] Green bar at 100% (`bg-emerald-500`), blue otherwise (`bg-sky-500`)
 
 **Testing:**
+
 - [x] E2E test: Add subtask
 - [x] E2E test: Toggle subtask completion
 - [x] E2E test: Progress bar updates
@@ -168,6 +187,7 @@
 - [x] Unit test: Progress calculation (8 tests)
 
 **Acceptance Criteria:**
+
 - [x] Can add unlimited subtasks
 - [x] Can toggle completion
 - [x] Progress updates in real-time
@@ -179,9 +199,11 @@
 ---
 
 ### Feature 06: Tag System
+
 **Status:** ✅ Complete
 
 **Implementation Checklist:**
+
 - [x] Database: `tags` and `todo_tags` tables
 - [x] API endpoint: `GET /api/tags`
 - [x] API endpoint: `POST /api/tags`
@@ -196,6 +218,7 @@
 - [x] Tag filter indicator with clear button
 
 **Testing:**
+
 - [x] E2E test: Create tag
 - [x] E2E test: Edit tag name/color
 - [x] E2E test: Delete tag
@@ -204,6 +227,7 @@
 - [x] E2E test: Duplicate tag name validation (API 409)
 
 **Acceptance Criteria:**
+
 - [x] Tags unique per user
 - [x] Custom colors work
 - [x] Editing tag updates all todos
@@ -215,9 +239,11 @@
 ---
 
 ### Feature 07: Template System
+
 **Status:** ✅ Complete
 
 **Implementation Checklist:**
+
 - [x] Database: `templates` table
 - [x] API endpoint: `GET /api/templates`
 - [x] API endpoint: `POST /api/templates`
@@ -232,6 +258,7 @@
 - [x] Due date offset calculation
 
 **Testing:**
+
 - [x] E2E test: Save todo as template
 - [x] E2E test: Create todo from template
 - [x] E2E test: Template preserves settings
@@ -241,6 +268,7 @@
 - [x] Unit test: Subtasks JSON serialization (22 tests)
 
 **Acceptance Criteria:**
+
 - [x] Can save current todo as template
 - [x] Templates include all metadata
 - [x] Using template creates new todo
@@ -252,9 +280,11 @@
 ---
 
 ### Feature 08: Search & Filtering
+
 **Status:** ✅ Complete
 
 **Implementation Checklist:**
+
 - [x] Search input field at top of page
 - [x] Real-time filtering (no submit button)
 - [x] Case-insensitive search
@@ -269,6 +299,7 @@
 - [x] Debounced search (300ms)
 
 **Testing:**
+
 - [x] E2E test: Search by title
 - [x] E2E test: Search by tag name
 - [x] E2E test: Filter by priority
@@ -277,6 +308,7 @@
 - [x] E2E test: Clear filters
 
 **Acceptance Criteria:**
+
 - [x] Search is case-insensitive
 - [x] Includes tag names in search
 - [x] Filters combine with AND
@@ -288,9 +320,11 @@
 ---
 
 ### Feature 09: Export & Import
+
 **Status:** ✅ Complete
 
 **Implementation Checklist:**
+
 - [x] API endpoint: `GET /api/todos/export`
 - [x] API endpoint: `POST /api/todos/import`
 - [x] Export button in UI
@@ -304,6 +338,7 @@
 - [x] Error handling for invalid JSON
 
 **Testing:**
+
 - [x] E2E test: Export button exists
 - [x] E2E test: Import valid file
 - [x] E2E test: Import invalid JSON (error shown)
@@ -314,6 +349,7 @@
 - [x] Unit test: JSON validation
 
 **Acceptance Criteria:**
+
 - [x] Export creates valid JSON
 - [x] Import validates format
 - [x] All relationships preserved
@@ -325,9 +361,11 @@
 ---
 
 ### Feature 10: Calendar View
+
 **Status:** ✅ Complete
 
 **Implementation Checklist:**
+
 - [x] Database: `holidays` table seeded with Singapore holidays (auto-seeded on init)
 - [x] API endpoint: `GET /api/holidays`
 - [x] Calendar page route: `/calendar`
@@ -343,6 +381,7 @@
 - [x] URL state management (`?month=YYYY-MM`)
 
 **Testing:**
+
 - [x] E2E test: Calendar loads current month
 - [x] E2E test: Navigate to prev/next month
 - [x] E2E test: Today button works
@@ -352,6 +391,7 @@
 - [x] Unit test: Calendar generation (17 tests)
 
 **Acceptance Criteria:**
+
 - [x] Calendar displays correctly
 - [x] Holidays shown
 - [x] Todos on correct dates
@@ -363,9 +403,11 @@
 ---
 
 ### Feature 11: Authentication (WebAuthn)
+
 **Status:** ✅ Complete
 
 **Implementation Checklist:**
+
 - [x] Database: `users` and `authenticators` tables
 - [x] API endpoint: `POST /api/auth/register-options`
 - [x] API endpoint: `POST /api/auth/register-verify`
@@ -383,6 +425,7 @@
 - [x] Protected routes redirect to login
 
 **Testing:**
+
 - [x] E2E test: Register new user (virtual authenticator)
 - [x] E2E test: Logout clears session
 - [x] E2E test: Protected route redirects unauthenticated
@@ -391,6 +434,7 @@
 - [x] Unit test: JWT creation/verification (13 tests)
 
 **Acceptance Criteria:**
+
 - [x] Registration works with passkey
 - [x] Login works with passkey
 - [x] Session persists 7 days
@@ -404,6 +448,7 @@
 ## Testing & Quality Assurance
 
 ### Unit Tests
+
 - [x] Database CRUD operations tested (53 tests)
 - [x] Date/time calculations tested — Singapore timezone (9 tests)
 - [x] Progress calculation tested (8 tests)
@@ -414,6 +459,7 @@
 **Total: 10 suites, 195 tests — ALL PASSING**
 
 ### E2E Tests (Playwright)
+
 - [x] All 11 feature test files created + 1 API integration test (12 total)
 - [x] `tests/helpers.ts` with reusable methods
 - [x] Virtual authenticator configured
@@ -424,6 +470,7 @@
 **Total: 12 suites, ~70+ E2E test cases**
 
 ### Code Quality
+
 - [x] ESLint configured (via next lint)
 - [x] TypeScript strict mode enabled
 - [x] No TypeScript errors (build passes cleanly)
@@ -431,6 +478,7 @@
 - [x] Loading states for async operations
 
 ### Accessibility
+
 - [ ] WCAG AA contrast ratios met — not formally audited
 - [ ] Keyboard navigation works for all actions — not verified
 - [ ] Screen reader labels on interactive elements — not verified
@@ -439,6 +487,7 @@
 - [ ] Lighthouse accessibility score > 90 — not tested
 
 ### Browser Compatibility
+
 - [x] Tested in Chrome/Edge (Chromium) via Playwright
 - [ ] Tested in Firefox — Playwright config only runs Chromium
 - [ ] Tested in Safari
@@ -450,16 +499,19 @@
 ## Performance & Optimization
 
 ### Frontend Performance
+
 - [x] Bundle size < 500KB (gzipped) — First Load JS: 110 KB (main page)
 - [x] Search/filter updates use 300ms debounce
 - [x] Standalone build output enabled for Docker optimization
 
 ### Backend Performance
+
 - [x] Database queries optimized (indexes on all foreign keys + due_date)
 - [x] Prepared statements used everywhere
 - [x] Synchronous SQLite operations (no async overhead)
 
 ### Database Optimization
+
 - [x] Indexes on foreign keys (`idx_authenticators_user_id`, `idx_todos_user_id`, `idx_subtasks_todo_id`, `idx_tags_user_id`, `idx_todo_tags_tag_id`, `idx_templates_user_id`)
 - [x] Index on `user_id` columns
 - [x] Index on `due_date` for filtering (`idx_todos_due_date`)
@@ -469,6 +521,7 @@
 ## Deployment Readiness
 
 ### Environment Configuration
+
 - [x] Environment variables documented (`.env.example`)
 - [x] `.env.example` file created
 - [x] JWT_SECRET documented
@@ -477,6 +530,7 @@
 - [x] WEBAUTHN_ORIGIN documented
 
 ### Security Checklist
+
 - [x] HTTP-only cookies in production
 - [x] Secure flag on cookies (when `NODE_ENV=production`)
 - [x] SameSite cookies configured (`strict`)
@@ -486,6 +540,7 @@
 - [ ] CORS properly configured — uses default Next.js CORS
 
 ### Production Readiness
+
 - [x] Production build succeeds (`npm run build`)
 - [x] Standalone output mode enabled
 - [x] Dockerfile with multi-stage build
@@ -495,6 +550,7 @@
 - [ ] Custom 500 error page — uses Next.js default
 
 ### Deployment Config Files
+
 - [x] `Dockerfile` — Multi-stage Node 18 Alpine, standalone output, non-root user
 - [x] `.dockerignore` — Excludes tests, docs, node_modules, .git
 - [x] `vercel.json` — Framework nextjs, region sin1
@@ -512,51 +568,51 @@
 
 ### Feature Completeness (0-110 points)
 
-| Feature | Score |
-|---------|-------|
-| 01: Todo CRUD Operations | 10/10 |
-| 02: Priority System | 10/10 |
-| 03: Recurring Todos | 10/10 |
+| Feature                       | Score |
+| ----------------------------- | ----- |
+| 01: Todo CRUD Operations      | 10/10 |
+| 02: Priority System           | 10/10 |
+| 03: Recurring Todos           | 10/10 |
 | 04: Reminders & Notifications | 10/10 |
-| 05: Subtasks & Progress | 10/10 |
-| 06: Tag System | 10/10 |
-| 07: Template System | 10/10 |
-| 08: Search & Filtering | 10/10 |
-| 09: Export & Import | 10/10 |
-| 10: Calendar View | 10/10 |
+| 05: Subtasks & Progress       | 10/10 |
+| 06: Tag System                | 10/10 |
+| 07: Template System           | 10/10 |
+| 08: Search & Filtering        | 10/10 |
+| 09: Export & Import           | 10/10 |
+| 10: Calendar View             | 10/10 |
 | 11: Authentication (WebAuthn) | 10/10 |
 
 **Total Feature Score: 110 / 110**
 
 ### Testing Coverage (0-30 points)
 
-| Area | Score | Notes |
-|------|-------|-------|
-| E2E tests | 15/15 | 12 suites, ~90+ cases. All critical flows covered including edit, delete, cascade, combined filters, template preview. |
-| Unit tests | 10/10 | 10 suites, 195 tests — all passing. Comprehensive coverage of utilities, DB, auth, timezone, recurring, reminders. |
-| Manual testing | 3/5 | No production deployment to manually verify. |
+| Area           | Score | Notes                                                                                                                  |
+| -------------- | ----- | ---------------------------------------------------------------------------------------------------------------------- |
+| E2E tests      | 15/15 | 12 suites, ~90+ cases. All critical flows covered including edit, delete, cascade, combined filters, template preview. |
+| Unit tests     | 10/10 | 10 suites, 195 tests — all passing. Comprehensive coverage of utilities, DB, auth, timezone, recurring, reminders.     |
+| Manual testing | 3/5   | No production deployment to manually verify.                                                                           |
 
 **Total Testing Score: 28 / 30**
 
 ### Deployment (0-30 points)
 
-| Area | Score | Notes |
-|------|-------|-------|
-| Successful deployment | 10/15 | Dockerfile, railway.json, vercel.json all configured. Docker build not verified. No live URL. |
-| Environment configuration | 5/5 | `.env.example` documents all vars. Railway volume support. Auto-seed holidays. |
-| Production testing | 0/5 | No production deployment verified. |
-| Documentation | 5/5 | `RAILWAY_SIMPLE_SETUP.md`, `RAILWAY_DEPLOYMENT.md`, `.env.example` all present. |
+| Area                      | Score | Notes                                                                                         |
+| ------------------------- | ----- | --------------------------------------------------------------------------------------------- |
+| Successful deployment     | 10/15 | Dockerfile, railway.json, vercel.json all configured. Docker build not verified. No live URL. |
+| Environment configuration | 5/5   | `.env.example` documents all vars. Railway volume support. Auto-seed holidays.                |
+| Production testing        | 0/5   | No production deployment verified.                                                            |
+| Documentation             | 5/5   | `RAILWAY_SIMPLE_SETUP.md`, `RAILWAY_DEPLOYMENT.md`, `.env.example` all present.               |
 
 **Total Deployment Score: 20 / 30**
 
 ### Quality & Performance (0-30 points)
 
-| Area | Score | Notes |
-|------|-------|-------|
-| Code quality | 9/10 | TypeScript strict mode. Clean build. Prepared statements. Proper error handling. Minor: no custom error pages. |
-| Performance | 9/10 | 110 KB first load. DB indexes on all keys. Standalone Docker output. Debounced search. |
-| Accessibility | 2/5 | No formal audit. Tailwind provides basic styling. No ARIA attributes verified. |
-| Security | 5/5 | HTTP-only cookies, SameSite strict, prepared statements, WebAuthn (no passwords), JWT sessions. |
+| Area          | Score | Notes                                                                                                          |
+| ------------- | ----- | -------------------------------------------------------------------------------------------------------------- |
+| Code quality  | 9/10  | TypeScript strict mode. Clean build. Prepared statements. Proper error handling. Minor: no custom error pages. |
+| Performance   | 9/10  | 110 KB first load. DB indexes on all keys. Standalone Docker output. Debounced search.                         |
+| Accessibility | 2/5   | No formal audit. Tailwind provides basic styling. No ARIA attributes verified.                                 |
+| Security      | 5/5   | HTTP-only cookies, SameSite strict, prepared statements, WebAuthn (no passwords), JWT sessions.                |
 
 **Total Quality Score: 25 / 30**
 
@@ -564,13 +620,13 @@
 
 ## Final Score
 
-| Category | Score |
-|----------|-------|
-| Feature Completeness | **110 / 110** |
-| Testing Coverage | **28 / 30** |
-| Deployment | **20 / 30** |
-| Quality & Performance | **25 / 30** |
-| **TOTAL** | **183 / 200** |
+| Category              | Score         |
+| --------------------- | ------------- |
+| Feature Completeness  | **110 / 110** |
+| Testing Coverage      | **28 / 30**   |
+| Deployment            | **20 / 30**   |
+| Quality & Performance | **25 / 30**   |
+| **TOTAL**             | **183 / 200** |
 
 ### Rating: 🎯 Excellent
 
@@ -579,6 +635,7 @@
 ---
 
 ## Key Strengths
+
 - All 11 features fully implemented with perfect 110/110 feature score
 - 195 unit tests across 10 suites — all passing
 - 12 E2E test suites with ~90+ test cases covering all major user flows and edge cases
@@ -588,6 +645,7 @@
 - Clean TypeScript build with strict mode, no errors
 
 ## Areas for Improvement
+
 - No formal accessibility audit (WCAG, Lighthouse)
 - No live production deployment verified
 - No custom error pages (404/500)

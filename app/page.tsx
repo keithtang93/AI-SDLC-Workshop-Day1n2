@@ -1,13 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  ChangeEvent,
-  FormEvent,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import { useNotifications } from "@/lib/hooks/useNotifications";
 
 type Priority = "high" | "medium" | "low";
@@ -126,9 +120,9 @@ export default function HomePage() {
   const [editDescription, setEditDescription] = useState("");
   const [editPriority, setEditPriority] = useState<Priority>("medium");
   const [editDueDate, setEditDueDate] = useState("");
-  const [editRecurrence, setEditRecurrence] = useState<
-    RecurrencePattern | ""
-  >("");
+  const [editRecurrence, setEditRecurrence] = useState<RecurrencePattern | "">(
+    "",
+  );
   const [editReminderMinutes, setEditReminderMinutes] = useState("");
   const [editSelectedTags, setEditSelectedTags] = useState<number[]>([]);
 
@@ -203,8 +197,13 @@ export default function HomePage() {
   };
 
   const grouped = useMemo(() => {
-    const priorityOrder: Record<Priority, number> = { high: 0, medium: 1, low: 2 };
-    const sortByPriority = (a: Todo, b: Todo) => priorityOrder[a.priority] - priorityOrder[b.priority];
+    const priorityOrder: Record<Priority, number> = {
+      high: 0,
+      medium: 1,
+      low: 2,
+    };
+    const sortByPriority = (a: Todo, b: Todo) =>
+      priorityOrder[a.priority] - priorityOrder[b.priority];
 
     const overdue: Todo[] = [];
     const active: Todo[] = [];
@@ -290,9 +289,7 @@ export default function HomePage() {
     setEditDescription(todo.description ?? "");
     setEditPriority(todo.priority);
     setEditDueDate(
-      todo.due_date
-        ? new Date(todo.due_date).toISOString().slice(0, 16)
-        : "",
+      todo.due_date ? new Date(todo.due_date).toISOString().slice(0, 16) : "",
     );
     setEditRecurrence(todo.recurrence_pattern ?? "");
     setEditReminderMinutes(
@@ -441,7 +438,9 @@ export default function HomePage() {
     });
     const result = await response.json();
     if (response.ok && result.imported !== undefined) {
-      setImportMessage(`Successfully imported ${result.imported} todo${result.imported === 1 ? "" : "s"}`);
+      setImportMessage(
+        `Successfully imported ${result.imported} todo${result.imported === 1 ? "" : "s"}`,
+      );
       setTimeout(() => setImportMessage(null), 5000);
     }
     event.target.value = "";
@@ -489,7 +488,10 @@ export default function HomePage() {
       </header>
 
       {importMessage && (
-        <div className="mb-4 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700" data-testid="import-success">
+        <div
+          className="mb-4 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700"
+          data-testid="import-success"
+        >
           {importMessage}
         </div>
       )}
@@ -637,7 +639,9 @@ export default function HomePage() {
             <select
               onChange={(e) => {
                 const id = Number(e.target.value);
-                setPreviewTemplate(id ? templates.find((t) => t.id === id) ?? null : null);
+                setPreviewTemplate(
+                  id ? (templates.find((t) => t.id === id) ?? null) : null,
+                );
               }}
               defaultValue=""
               className="rounded border px-3 py-2"
@@ -653,9 +657,14 @@ export default function HomePage() {
         </div>
 
         {previewTemplate && (
-          <div className="mt-3 rounded border border-slate-200 bg-slate-50 p-3" data-testid="template-preview">
+          <div
+            className="mt-3 rounded border border-slate-200 bg-slate-50 p-3"
+            data-testid="template-preview"
+          >
             <div className="mb-2 flex items-center justify-between">
-              <h3 className="text-sm font-semibold">Template Preview: {previewTemplate.name}</h3>
+              <h3 className="text-sm font-semibold">
+                Template Preview: {previewTemplate.name}
+              </h3>
               <button
                 onClick={() => setPreviewTemplate(null)}
                 className="rounded bg-slate-200 px-2 py-1 text-xs"
@@ -664,24 +673,43 @@ export default function HomePage() {
               </button>
             </div>
             <div className="grid gap-1 text-xs text-slate-600">
-              <p><span className="font-medium">Title:</span> {previewTemplate.title}</p>
-              <p><span className="font-medium">Priority:</span> {previewTemplate.priority}</p>
+              <p>
+                <span className="font-medium">Title:</span>{" "}
+                {previewTemplate.title}
+              </p>
+              <p>
+                <span className="font-medium">Priority:</span>{" "}
+                {previewTemplate.priority}
+              </p>
               {previewTemplate.description && (
-                <p><span className="font-medium">Description:</span> {previewTemplate.description}</p>
+                <p>
+                  <span className="font-medium">Description:</span>{" "}
+                  {previewTemplate.description}
+                </p>
               )}
               {previewTemplate.recurrence_pattern && (
-                <p><span className="font-medium">Recurrence:</span> {previewTemplate.recurrence_pattern}</p>
+                <p>
+                  <span className="font-medium">Recurrence:</span>{" "}
+                  {previewTemplate.recurrence_pattern}
+                </p>
               )}
               {previewTemplate.reminder_minutes !== null && (
-                <p><span className="font-medium">Reminder:</span> {previewTemplate.reminder_minutes} minutes before</p>
+                <p>
+                  <span className="font-medium">Reminder:</span>{" "}
+                  {previewTemplate.reminder_minutes} minutes before
+                </p>
               )}
               {(() => {
-                const subtasks = JSON.parse(previewTemplate.subtasks_json || "[]") as Array<{title: string}>;
+                const subtasks = JSON.parse(
+                  previewTemplate.subtasks_json || "[]",
+                ) as Array<{ title: string }>;
                 return subtasks.length > 0 ? (
                   <div>
                     <span className="font-medium">Subtasks:</span>
                     <ul className="ml-4 list-disc">
-                      {subtasks.map((s, i) => <li key={i}>{s.title}</li>)}
+                      {subtasks.map((s, i) => (
+                        <li key={i}>{s.title}</li>
+                      ))}
                     </ul>
                   </div>
                 ) : null;
@@ -748,7 +776,10 @@ export default function HomePage() {
           </div>
         )}
         {editingTag && (
-          <form onSubmit={saveTag} className="mt-3 flex flex-wrap gap-2 rounded border p-2">
+          <form
+            onSubmit={saveTag}
+            className="mt-3 flex flex-wrap gap-2 rounded border p-2"
+          >
             <span className="text-sm font-medium self-center">Edit tag:</span>
             <input
               className="rounded border px-3 py-2"
@@ -1066,9 +1097,7 @@ export default function HomePage() {
                 className="rounded border px-3 py-2"
                 value={editRecurrence}
                 onChange={(e) =>
-                  setEditRecurrence(
-                    e.target.value as RecurrencePattern | "",
-                  )
+                  setEditRecurrence(e.target.value as RecurrencePattern | "")
                 }
               >
                 <option value="">No recurrence</option>
@@ -1082,7 +1111,9 @@ export default function HomePage() {
                 value={editReminderMinutes}
                 onChange={(e) => setEditReminderMinutes(e.target.value)}
                 disabled={!editDueDate}
-                title={!editDueDate ? "Set a due date first to enable reminders" : ""}
+                title={
+                  !editDueDate ? "Set a due date first to enable reminders" : ""
+                }
               >
                 {reminderOptions.map((option) => (
                   <option key={option.value} value={option.value}>

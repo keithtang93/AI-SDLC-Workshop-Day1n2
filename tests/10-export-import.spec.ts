@@ -83,7 +83,9 @@ test.describe("Feature 09: Export & Import", () => {
     expect(response.status()).toBe(400);
   });
 
-  test("import preserves all data including subtasks and tags", async ({ page }) => {
+  test("import preserves all data including subtasks and tags", async ({
+    page,
+  }) => {
     const importPayload = {
       data: {
         version: 1,
@@ -109,7 +111,9 @@ test.describe("Feature 09: Export & Import", () => {
     await page.reload();
 
     // Verify the todo appears with its data
-    const article = page.locator("article").filter({ hasText: "Full import todo" });
+    const article = page
+      .locator("article")
+      .filter({ hasText: "Full import todo" });
     await expect(article).toBeVisible();
     await expect(article.getByText("high", { exact: true })).toBeVisible();
     await expect(article.getByText("ImportedTag")).toBeVisible();

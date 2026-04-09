@@ -46,7 +46,9 @@ test.describe("Feature 06: Tag System", () => {
     await createTodo(page, { title: "Office task" });
 
     // Filter by Home tag using the tag filter dropdown (3rd select, index 2)
-    const filterSection = page.locator("section").filter({ hasText: "Search & Filters" });
+    const filterSection = page
+      .locator("section")
+      .filter({ hasText: "Search & Filters" });
     const tagSelect = filterSection.locator("select").nth(2);
     // Find the Home tag option
     await tagSelect.selectOption({ label: "Home" });
@@ -65,7 +67,9 @@ test.describe("Feature 06: Tag System", () => {
     await expect(page.getByRole("button", { name: "EditMe" })).toBeVisible();
 
     // Click the edit button on the tag in the Manage Tags section
-    const tagSection = page.locator("section").filter({ hasText: "Manage Tags" });
+    const tagSection = page
+      .locator("section")
+      .filter({ hasText: "Manage Tags" });
     const editBtn = tagSection.locator('button[title="Edit tag"]');
     await editBtn.click();
 
@@ -73,14 +77,19 @@ test.describe("Feature 06: Tag System", () => {
     await expect(tagSection.getByText("Edit tag:")).toBeVisible();
 
     // Change name
-    const nameInput = tagSection.locator("form").last().locator('input[placeholder="Tag name"]');
+    const nameInput = tagSection
+      .locator("form")
+      .last()
+      .locator('input[placeholder="Tag name"]');
     await nameInput.fill("Renamed");
     await tagSection.getByRole("button", { name: "Save" }).click();
     await page.waitForTimeout(500);
 
     // Verify name changed
     await expect(page.getByRole("button", { name: "Renamed" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "EditMe" })).not.toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "EditMe" }),
+    ).not.toBeVisible();
   });
 
   test("delete tag removes it", async ({ page }) => {
@@ -88,14 +97,19 @@ test.describe("Feature 06: Tag System", () => {
     await expect(page.getByRole("button", { name: "DeleteMe" })).toBeVisible();
 
     // Click the delete button on the tag
-    const tagSection = page.locator("section").filter({ hasText: "Manage Tags" });
+    const tagSection = page
+      .locator("section")
+      .filter({ hasText: "Manage Tags" });
     const deleteBtn = tagSection.locator('button[title="Delete tag"]');
     await deleteBtn.click();
     await page.waitForTimeout(500);
 
     // Tag should no longer be visible in the form tags area
     await expect(
-      tagSection.locator("div").filter({ hasText: "DeleteMe" }).locator('button[title="Delete tag"]'),
+      tagSection
+        .locator("div")
+        .filter({ hasText: "DeleteMe" })
+        .locator('button[title="Delete tag"]'),
     ).not.toBeVisible();
   });
 

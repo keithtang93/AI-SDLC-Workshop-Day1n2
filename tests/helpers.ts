@@ -4,20 +4,21 @@ export async function gotoLogin(page: Page): Promise<void> {
   await page.goto("/login");
 }
 
-export async function addVirtualAuthenticator(
-  page: Page,
-): Promise<string> {
+export async function addVirtualAuthenticator(page: Page): Promise<string> {
   const client = await page.context().newCDPSession(page);
   await client.send("WebAuthn.enable");
-  const { authenticatorId } = await client.send("WebAuthn.addVirtualAuthenticator", {
-    options: {
-      protocol: "ctap2",
-      transport: "internal",
-      hasResidentKey: true,
-      hasUserVerification: true,
-      isUserVerified: true,
+  const { authenticatorId } = await client.send(
+    "WebAuthn.addVirtualAuthenticator",
+    {
+      options: {
+        protocol: "ctap2",
+        transport: "internal",
+        hasResidentKey: true,
+        hasUserVerification: true,
+        isUserVerified: true,
+      },
     },
-  });
+  );
   return authenticatorId;
 }
 
@@ -30,19 +31,20 @@ export async function registerUser(
   await page.getByPlaceholder("your name").fill(username);
   await page.getByRole("button", { name: "Create Passkey" }).click();
   await page.waitForURL("/", { timeout: 30000 });
-  await expect(page.getByRole("heading", { name: "Todo Workspace" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Todo Workspace" }),
+  ).toBeVisible();
 }
 
-export async function loginUser(
-  page: Page,
-  username: string,
-): Promise<void> {
+export async function loginUser(page: Page, username: string): Promise<void> {
   await page.goto("/login");
   await addVirtualAuthenticator(page);
   await page.getByPlaceholder("your name").fill(username);
   await page.getByRole("button", { name: "Sign In with Passkey" }).click();
   await page.waitForURL("/", { timeout: 30000 });
-  await expect(page.getByRole("heading", { name: "Todo Workspace" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Todo Workspace" }),
+  ).toBeVisible();
 }
 
 export async function createTodo(
@@ -63,10 +65,7 @@ export async function createTodo(
   }
 
   if (options.priority) {
-    await page
-      .locator("form select")
-      .first()
-      .selectOption(options.priority);
+    await page.locator("form select").first().selectOption(options.priority);
   }
 
   if (options.dueDate) {
