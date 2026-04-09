@@ -1,17 +1,11 @@
-# ---- Stage 1: Install dependencies ----
-FROM node:18-alpine AS deps
-RUN apk add --no-cache python3 make g++ libc6-compat
-WORKDIR /app
-# Only copy package.json (no lockfile) so npm resolves platform-native
-# bindings (e.g. @tailwindcss/oxide-linux-x64-musl) fresh for Alpine
-COPY package.json ./
-RUN npm install
-
-# ---- Stage 2: Build the application ----
+# ---- Stage 1: Build the application ----
 FROM node:18-alpine AS builder
 RUN apk add --no-cache python3 make g++ libc6-compat
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+# Copy package.json only (no lockfile) so npm resolves platform-native
+# bindings (e.g. @tailwindcss/oxide-linux-x64-musl) fresh for Alpine
+COPY package.json ./
+RUN npm install
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
