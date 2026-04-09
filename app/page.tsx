@@ -760,7 +760,7 @@ export default function HomePage() {
             <button onClick={handleCreateTodo} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">Add</button>
           </div>
           <div className="flex flex-wrap gap-2 items-center">
-            <select value={priority} onChange={e => setPriority(e.target.value)} className="px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
+            <select name="priority" value={priority} onChange={e => setPriority(e.target.value)} className="px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
               <option value="high">High</option>
               <option value="medium">Medium</option>
               <option value="low">Low</option>
@@ -778,7 +778,7 @@ export default function HomePage() {
                 <option value="yearly">Yearly</option>
               </select>
             )}
-            <select value={reminderMinutes} onChange={e => setReminderMinutes(e.target.value)} disabled={!dueDate} className="px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm disabled:opacity-50">
+            <select name="reminder" value={reminderMinutes} onChange={e => setReminderMinutes(e.target.value)} disabled={!dueDate} className="px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm disabled:opacity-50">
               {REMINDER_OPTIONS.map(opt => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}

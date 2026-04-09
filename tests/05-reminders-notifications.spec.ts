@@ -16,12 +16,12 @@ test.describe('Reminders & Notifications', () => {
     await page.fill('input[placeholder="What needs to be done?"]', 'Reminder task')
     await page.fill('input[type="datetime-local"]', dateStr)
     // Select "15 minutes before" reminder
-    const reminderSelect = page.locator('select').last()
+    const reminderSelect = page.locator('select[name="reminder"]')
     await reminderSelect.selectOption('15')
     await page.click('button:has-text("Add")')
     await expect(page.locator('text=Reminder task')).toBeVisible()
     // Verify reminder badge
-    await expect(page.locator('text=🔔')).toBeVisible()
+    await expect(page.locator('text=🔔 15m')).toBeVisible()
   })
 
   test('should display notification permission button', async ({ page }) => {
@@ -35,11 +35,11 @@ test.describe('Reminders & Notifications', () => {
     const dateStr = tomorrow.toISOString().slice(0, 16)
     await page.fill('input[placeholder="What needs to be done?"]', 'One-hour reminder')
     await page.fill('input[type="datetime-local"]', dateStr)
-    const reminderSelect = page.locator('select').last()
+    const reminderSelect = page.locator('select[name="reminder"]')
     await reminderSelect.selectOption('60')
     await page.click('button:has-text("Add")')
     await expect(page.locator('text=One-hour reminder')).toBeVisible()
-    await expect(page.locator('text=🔔 1 hour')).toBeVisible()
+    await expect(page.locator('text=🔔 1h')).toBeVisible()
   })
 
   test('should check notifications API returns proper response when authenticated', async ({ request, page }) => {
@@ -57,7 +57,7 @@ test.describe('Reminders & Notifications', () => {
   test('reminder select should be disabled without a due date', async ({ page }) => {
     // The last select (reminder) should be disabled when no due date is set
     // Don't set a due date - just check the reminder select state
-    const reminderSelect = page.locator('select').last()
+    const reminderSelect = page.locator('select[name="reminder"]')
     await expect(reminderSelect).toBeDisabled()
   })
 })

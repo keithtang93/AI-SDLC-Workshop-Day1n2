@@ -11,7 +11,7 @@ test.describe('Tag System', () => {
 
   test('should create a tag via the Manage Tags modal', async ({ page }) => {
     await page.click('button:has-text("+ Manage Tags")')
-    await expect(page.locator('text=Manage Tags')).toBeVisible()
+    await expect(page.locator('h2:has-text("Manage Tags")')).toBeVisible()
     await page.fill('input[placeholder="Tag name"]', 'Work')
     await page.click('button:has-text("Create Tag")')
     await expect(page.locator('div[role="dialog"] >> text=Work')).toBeVisible()
@@ -79,7 +79,7 @@ test.describe('Tag System', () => {
     // Click edit
     await page.locator('div[role="dialog"] button:has-text("Edit")').first().click()
     // Clear and type new name
-    const editInput = page.locator('div[role="dialog"] input[type="text"]').first()
+    const editInput = page.locator('div[role="dialog"] input[type="text"]').nth(1)
     await editInput.fill('NewName')
     await page.locator('div[role="dialog"] button:has-text("Update")').click()
     await expect(page.locator('div[role="dialog"] >> text=NewName')).toBeVisible()

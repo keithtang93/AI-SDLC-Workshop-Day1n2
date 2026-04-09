@@ -13,7 +13,7 @@ test.describe('Template System', () => {
     // Type a title to make the "Save as Template" button appear
     await page.fill('input[placeholder="What needs to be done?"]', 'Template source')
     await page.click('button:has-text("💾 Save as Template")')
-    await expect(page.locator('text=Save as Template')).toBeVisible()
+    await expect(page.locator('h2:has-text("Save as Template")')).toBeVisible()
     await page.fill('input[placeholder="Template name"]', 'My Template')
     await page.fill('input[placeholder="Description (optional)"]', 'A test template')
     await page.fill('input[placeholder="Category (optional)"]', 'Testing')
@@ -37,7 +37,7 @@ test.describe('Template System', () => {
     await expect(page.locator('div[role="dialog"] >> text=Reusable Task')).toBeVisible()
     await page.locator('div[role="dialog"] button:has-text("Use")').first().click()
     // A todo should be created from the template
-    await expect(page.locator('text=From template')).toBeVisible({ timeout: 5000 })
+    await expect(page.getByText('From template', { exact: true })).toBeVisible({ timeout: 5000 })
   })
 
   test('should delete a template', async ({ page }) => {
