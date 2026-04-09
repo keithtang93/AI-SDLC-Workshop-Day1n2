@@ -1,13 +1,15 @@
 # ---- Stage 1: Install dependencies ----
 FROM node:18-alpine AS deps
-RUN apk add --no-cache python3 make g++
+RUN apk add --no-cache python3 make g++ libc6-compat
 WORKDIR /app
 COPY package.json package-lock.json* ./
-RUN npm ci
+# Use npm install (not ci) to resolve platform-specific optional deps
+# (npm ci doesn't install Alpine/musl native bindings from a macOS lockfile)
+RUN npm install
 
 # ---- Stage 2: Build the application ----
 FROM node:18-alpine AS builder
-RUN apk add --no-cache python3 make g++
+RUN apk add --no-cache python3 make g++ libc6-compat
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
