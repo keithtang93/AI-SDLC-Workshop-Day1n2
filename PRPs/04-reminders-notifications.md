@@ -1,3 +1,11 @@
+---
+id: PRP-04
+title: Reminders & Notifications
+status: ready-for-build
+depends_on: [PRP-01, PRP-03]
+test_file: tests/05-reminders-notifications.spec.ts
+---
+
 # PRP 04: Reminders & Notifications
 
 ## Feature Overview
@@ -10,6 +18,16 @@ Core project conventions:
 - Use browser Notification APIs only after permission is granted
 - Use API + polling to decide when alerts are due
 - Track `last_notification_sent` to prevent duplicates
+
+## Agent Build Brief
+
+| Field | Value |
+|-------|-------|
+| **Build scope** | Reminder timing selection, notification permission flow, polling hook, and duplicate-prevention tracking |
+| **Depends on** | `PRP-01` due dates and `PRP-03` recurring-time behavior |
+| **Pre-read** | `lib/timezone.ts`, `app/page.tsx`, `lib/db.ts`, `app/api/notifications/check/route.ts` (or planned path), `.github/copilot-instructions.md` |
+| **Do not drift into** | Service workers, push-notification infrastructure, or mobile-native notification systems |
+| **Verification gate** | `npm run lint`, `npm run build`, `npx playwright test tests/05-reminders-notifications.spec.ts` |
 
 ---
 

@@ -1,3 +1,11 @@
+---
+id: PRP-05
+title: Subtasks & Progress Tracking
+status: ready-for-build
+depends_on: [PRP-01]
+test_file: tests/06-subtasks-progress.spec.ts
+---
+
 # PRP 05: Subtasks & Progress Tracking
 
 ## Feature Overview
@@ -10,6 +18,16 @@ This feature must follow the app's existing patterns:
 - All API routes require `getSession()` and user scoping
 - Deleting a parent todo must cascade to child subtasks
 - The UI should update progress immediately after every subtask action
+
+## Agent Build Brief
+
+| Field | Value |
+|-------|-------|
+| **Build scope** | Subtask CRUD, expandable checklist UI, real-time progress bar, and parent cascade delete |
+| **Depends on** | `PRP-01` todo ownership and delete behavior |
+| **Pre-read** | `lib/db.ts`, `app/page.tsx`, `tests/helpers.ts`, `.github/copilot-instructions.md` |
+| **Do not drift into** | Nested subtasks, drag-to-reorder UX, or subtask due dates |
+| **Verification gate** | `npm run lint`, `npm run build`, `npx playwright test tests/06-subtasks-progress.spec.ts` |
 
 ---
 

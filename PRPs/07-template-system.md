@@ -1,3 +1,11 @@
+---
+id: PRP-07
+title: Template System
+status: ready-for-build
+depends_on: [PRP-01, PRP-03, PRP-05]
+test_file: tests/08-template-system.spec.ts
+---
+
 # PRP 07: Template System
 
 ## Feature Overview
@@ -10,6 +18,16 @@ Project conventions for this feature:
 - Keep template usage scoped to `session.userId`
 - Recreate template subtasks from JSON when a template is used
 - Use Singapore-aware due-date logic when generating dates from offsets
+
+## Agent Build Brief
+
+| Field | Value |
+|-------|-------|
+| **Build scope** | Save template, browse/use template, restore metadata, and recreate serialized subtasks |
+| **Depends on** | `PRP-01` todos, `PRP-03` recurrence, and `PRP-05` subtask structure |
+| **Pre-read** | `lib/db.ts`, `app/page.tsx`, `PRPs/03-recurring-todos.md`, `PRPs/05-subtasks-progress.md` |
+| **Do not drift into** | Shared/public templates, template syncing, or workflow automation beyond one-click reuse |
+| **Verification gate** | `npm run lint`, `npm run build`, `npx playwright test tests/08-template-system.spec.ts` |
 
 ---
 

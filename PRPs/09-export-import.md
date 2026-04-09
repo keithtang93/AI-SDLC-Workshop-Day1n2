@@ -1,3 +1,11 @@
+---
+id: PRP-09
+title: Export & Import
+status: ready-for-build
+depends_on: [PRP-01, PRP-05, PRP-06]
+test_file: tests/10-export-import.spec.ts
+---
+
 # PRP 09: Export & Import
 
 ## Feature Overview
@@ -10,6 +18,16 @@ Key conventions:
 - JSON format is the canonical backup format
 - Import must validate data before writing anything
 - Relationships must be preserved through ID remapping
+
+## Agent Build Brief
+
+| Field | Value |
+|-------|-------|
+| **Build scope** | JSON export, validated JSON import, ID remapping, and relationship preservation |
+| **Depends on** | `PRP-01` todo data plus `PRP-05` subtasks and `PRP-06` tags |
+| **Pre-read** | `lib/db.ts`, `app/page.tsx`, `PRPs/05-subtasks-progress.md`, `PRPs/06-tag-system.md` |
+| **Do not drift into** | Cloud sync, third-party formats, or CSV work unless explicitly requested as stretch |
+| **Verification gate** | `npm run lint`, `npm run build`, `npx playwright test tests/10-export-import.spec.ts` |
 
 ---
 

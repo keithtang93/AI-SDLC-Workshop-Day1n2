@@ -1,3 +1,11 @@
+---
+id: PRP-11
+title: Authentication (WebAuthn / Passkeys)
+status: ready-for-build
+depends_on: []
+test_file: tests/01-authentication.spec.ts
+---
+
 # PRP 11: Authentication (WebAuthn / Passkeys)
 
 ## Feature Overview
@@ -11,6 +19,16 @@ Project-specific rules that must be followed:
 - Protect `/` and `/calendar` through `middleware.ts`
 - Use `counter ?? 0` when passing authenticator counters into verification calls
 - Use `isoBase64URL` for credential id conversions where needed
+
+## Agent Build Brief
+
+| Field | Value |
+|-------|-------|
+| **Build scope** | Passkey registration/login, JWT sessions, logout, current-user check, and protected-route middleware |
+| **Depends on** | None; can be built early and then reused by all other PRPs |
+| **Pre-read** | `lib/auth.ts`, `lib/db.ts`, `middleware.ts`, `.github/copilot-instructions.md`, WebAuthn route files |
+| **Do not drift into** | Password fallback, social login, or recovery flows outside the scoped auth model |
+| **Verification gate** | `npm run lint`, `npm run build`, `npx playwright test tests/01-authentication.spec.ts` |
 
 ---
 

@@ -98,6 +98,16 @@ Test files are ordered by **execution dependency** while PRPs are ordered by **i
 
 ## 🎯 How to Use These PRPs
 
+### 🤖 Agent Execution Contract
+
+When handing one of these PRPs to another coding agent, follow this operating rule set:
+
+1. **Read the YAML frontmatter and `Agent Build Brief` first** to understand scope, dependencies, and verification commands.
+2. Treat **Canonical Acceptance Criteria**, **Validation Rules**, and **API Contract** as **MUST** requirements.
+3. Treat **Frontend / UX Requirements** and the **Step-by-Step Implementation Plan** as **SHOULD** guidance unless they conflict with the codebase reality.
+4. Treat anything explicitly marked **Optional** or **Stretch** as **MAY** and skip it unless requested.
+5. Do not claim completion until the PRP's listed verification commands have been run and their output has been checked.
+
 ### For AI Coding Assistants (GitHub Copilot, etc.)
 
 1. **Feature Implementation**: Copy the entire PRP into your chat to implement a feature from scratch
@@ -116,7 +126,9 @@ Test files are ordered by **execution dependency** while PRPs are ordered by **i
 
 Each PRP follows this consistent structure:
 
+- **YAML Frontmatter** - Machine-readable metadata for orchestration and dependency ordering
 - **Feature Overview** - High-level description and baseline project conventions
+- **Agent Build Brief** - Scope, dependencies, pre-read files, drift guardrails, and verification gate
 - **Why This Feature Matters** - UX and business rationale
 - **User Stories** - Core and supporting user needs
 - **Canonical Acceptance Criteria** - Verbatim evaluation checklist items
@@ -152,9 +164,12 @@ Each PRP follows this consistent structure:
 ### Using with GitHub Copilot Chat
 
 ```plaintext
-"I want to implement [feature name]. 
-Here's the PRP: [paste PRP content]
-Please help me implement this following the project patterns."
+"Implement this PRP exactly as scoped.
+Read the YAML frontmatter and Agent Build Brief first.
+Do the MUST requirements before any optional stretch work.
+Follow the repo conventions from .github/copilot-instructions.md.
+Run the listed verification commands before claiming completion.
+Here is the PRP: [paste PRP content]"
 ```
 
 ### Feature Dependencies

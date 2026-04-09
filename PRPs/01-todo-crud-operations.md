@@ -1,3 +1,11 @@
+---
+id: PRP-01
+title: Todo CRUD Operations
+status: ready-for-build
+depends_on: []
+test_file: tests/02-todo-crud.spec.ts
+---
+
 # PRP 01: Todo CRUD Operations
 
 ## Feature Overview
@@ -12,6 +20,16 @@ This project uses the following non-negotiable conventions:
 - **Timezone:** **Singapore timezone only** via `lib/timezone.ts`
 - **Main UI:** `app/page.tsx` is the primary client component for todo interactions
 - **Server-side data access:** `lib/db.ts` is the single source of truth for database interfaces and CRUD methods
+
+## Agent Build Brief
+
+| Field | Value |
+|-------|-------|
+| **Build scope** | Main-page todo CRUD, section sorting, completion toggle, edit flow, and cascade-safe delete |
+| **Depends on** | None for core implementation; reuse the auth/session pattern for production-safe routes |
+| **Pre-read** | `lib/db.ts`, `app/api/todos/route.ts`, `app/api/todos/[id]/route.ts`, `app/page.tsx`, `.github/copilot-instructions.md` |
+| **Do not drift into** | Full tag CRUD, templates, calendar, or broad UI refactors |
+| **Verification gate** | `npm run lint`, `npm run build`, `npx playwright test tests/02-todo-crud.spec.ts` |
 
 ---
 

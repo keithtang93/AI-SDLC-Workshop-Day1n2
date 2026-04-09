@@ -1,3 +1,11 @@
+---
+id: PRP-03
+title: Recurring Todos
+status: ready-for-build
+depends_on: [PRP-01, PRP-02]
+test_file: tests/04-recurring-todos.spec.ts
+---
+
 # PRP 03: Recurring Todos
 
 ## Feature Overview
@@ -10,6 +18,16 @@ Project rules for this feature:
 - Keep database operations synchronous in `lib/db.ts`
 - Handle recurrence primarily through `PUT /api/todos/[id]`
 - Preserve user scoping on every create/update operation
+
+## Agent Build Brief
+
+| Field | Value |
+|-------|-------|
+| **Build scope** | Recurrence fields, due-date calculation, completion-triggered next-instance creation, and metadata inheritance |
+| **Depends on** | `PRP-01` CRUD behavior and `PRP-02` priority retention |
+| **Pre-read** | `PRPs/01-todo-crud-operations.md`, `lib/timezone.ts`, `app/api/todos/[id]/route.ts`, `lib/db.ts` |
+| **Do not drift into** | Notification delivery, calendar rendering, or background scheduling systems |
+| **Verification gate** | `npm run lint`, `npm run build`, `npx playwright test tests/04-recurring-todos.spec.ts` |
 
 ---
 

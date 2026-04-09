@@ -1,3 +1,11 @@
+---
+id: PRP-06
+title: Tag System
+status: ready-for-build
+depends_on: [PRP-01]
+test_file: tests/07-tag-system.spec.ts
+---
+
 # PRP 06: Tag System
 
 ## Feature Overview
@@ -10,6 +18,16 @@ Core conventions for this feature:
 - Use a many-to-many relation through `todo_tags`
 - Keep CRUD logic in `lib/db.ts` and REST routes under `app/api/`
 - Render tags as colored pills across the UI
+
+## Agent Build Brief
+
+| Field | Value |
+|-------|-------|
+| **Build scope** | User-scoped tag CRUD, todo-tag assignment, colored pills, and tag filtering |
+| **Depends on** | `PRP-01` todo CRUD and ownership rules |
+| **Pre-read** | `lib/db.ts`, `app/page.tsx`, `PRPs/01-todo-crud-operations.md`, `.github/copilot-instructions.md` |
+| **Do not drift into** | Nested taxonomies, analytics, or full search preset systems |
+| **Verification gate** | `npm run lint`, `npm run build`, `npx playwright test tests/07-tag-system.spec.ts` |
 
 ---
 

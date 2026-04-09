@@ -1,3 +1,11 @@
+---
+id: PRP-10
+title: Calendar View
+status: ready-for-build
+depends_on: [PRP-01]
+test_file: tests/11-calendar-view.spec.ts
+---
+
 # PRP 10: Calendar View
 
 ## Feature Overview
@@ -10,6 +18,16 @@ Project rules for this feature:
 - holidays come from the SQLite `holidays` table
 - calendar data should stay in sync with the main todo list
 - UI should remain readable in both light and dark mode
+
+## Agent Build Brief
+
+| Field | Value |
+|-------|-------|
+| **Build scope** | Monthly calendar page, holiday display, month navigation, and per-day todo drill-down |
+| **Depends on** | `PRP-01` due dates and core todo data |
+| **Pre-read** | `app/calendar/page.tsx` (or planned page), `lib/timezone.ts`, `lib/db.ts`, `scripts/seed-holidays.ts` |
+| **Do not drift into** | Drag-and-drop rescheduling, multi-view calendars, or scheduling engines |
+| **Verification gate** | `npm run lint`, `npm run build`, `npx playwright test tests/11-calendar-view.spec.ts` |
 
 ---
 

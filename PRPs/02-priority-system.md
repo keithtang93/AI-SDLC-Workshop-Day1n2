@@ -1,3 +1,11 @@
+---
+id: PRP-02
+title: Priority System
+status: ready-for-build
+depends_on: [PRP-01]
+test_file: tests/03-priority-system.spec.ts
+---
+
 # PRP 02: Priority System
 
 ## Feature Overview
@@ -11,6 +19,16 @@ This PRP follows the project's non-negotiable rules:
 - **Timezone:** Singapore-only date handling through `lib/timezone.ts`
 - **Source of truth:** `lib/db.ts` owns shared types and DB access
 - **Main UI:** `app/page.tsx` remains the central todo experience
+
+## Agent Build Brief
+
+| Field | Value |
+|-------|-------|
+| **Build scope** | Add priority selection, validation, sorting, badges, and filtering |
+| **Depends on** | `PRP-01` CRUD foundations |
+| **Pre-read** | `PRPs/01-todo-crud-operations.md`, `lib/db.ts`, `app/page.tsx`, `.github/copilot-instructions.md` |
+| **Do not drift into** | Recurrence, reminders, tags, or theme refactors unrelated to priority styling |
+| **Verification gate** | `npm run lint`, `npm run build`, `npx playwright test tests/03-priority-system.spec.ts` |
 
 ---
 

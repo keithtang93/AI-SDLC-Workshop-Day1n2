@@ -1,3 +1,11 @@
+---
+id: PRP-08
+title: Search & Filtering
+status: ready-for-build
+depends_on: [PRP-01, PRP-02, PRP-06]
+test_file: tests/09-search-filtering.spec.ts
+---
+
 # PRP 08: Search & Filtering
 
 ## Feature Overview
@@ -10,6 +18,16 @@ This feature is primarily **client-side** and should follow these rules:
 - matching is case-insensitive
 - active filters combine with AND logic
 - search should cover titles, subtasks, and tag names when available
+
+## Agent Build Brief
+
+| Field | Value |
+|-------|-------|
+| **Build scope** | Real-time client-side search, AND-based filters, clear/reset behavior, and empty states |
+| **Depends on** | `PRP-01` list rendering, `PRP-02` priority fields, and `PRP-06` tag data |
+| **Pre-read** | `app/page.tsx`, `lib/db.ts`, `PRPs/02-priority-system.md`, `PRPs/06-tag-system.md` |
+| **Do not drift into** | Server-side full-text search or optional preset features unless explicitly requested |
+| **Verification gate** | `npm run lint`, `npm run build`, `npx playwright test tests/09-search-filtering.spec.ts` |
 
 ---
 
