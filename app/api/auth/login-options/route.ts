@@ -4,6 +4,7 @@ import { authenticatorDB, userDB } from "@/lib/db";
 import { setChallenge } from "@/lib/webauthn-store";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  try {
   const body = await request.json();
   const username = String(body?.username ?? "").trim();
 
@@ -33,4 +34,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   setChallenge(username, options.challenge);
   return NextResponse.json(options);
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Internal server error" },
+      { status: 500 },
+    );
+  }
 }

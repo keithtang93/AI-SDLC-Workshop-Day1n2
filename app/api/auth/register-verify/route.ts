@@ -6,6 +6,7 @@ import { authenticatorDB, userDB } from "@/lib/db";
 import { consumeChallenge } from "@/lib/webauthn-store";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  try {
   const body = await request.json();
   const username = String(body?.username ?? "").trim();
   const attestationResponse = body?.response;
@@ -60,4 +61,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   await createSession(user.id, user.username);
   return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Internal server error" },
+      { status: 500 },
+    );
+  }
 }
