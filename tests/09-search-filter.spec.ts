@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { registerUser, createTodo, uniqueUser } from "./helpers";
+import { registerUser, createTodo, createTag, uniqueUser } from "./helpers";
 
 test.describe("Feature 08: Search & Filtering", () => {
   test.beforeEach(async ({ page }) => {
@@ -71,5 +71,37 @@ test.describe("Feature 08: Search & Filtering", () => {
   test("empty results show no todos message", async ({ page }) => {
     await page.getByPlaceholder("Search todos, subtasks, or tags").fill("nonexistent_xyz_123");
     await expect(page.getByText("No todos in this section.").first()).toBeVisible();
+  });
+
+  test("search by tag name", async ({ page }) => {
+    await createTag(page, "SearchableTag");
+    // Select the tag
+    await page.getByRole("button", { name: "SearchableTag" }).click();
+    await createTodo(page, { title: "Tag search parent" });
+
+    // Search by tag name
+    await page.getByPlaceholder("Search todos, subtasks, or tags").fill("SearchableTag");
+    await page.waitForTimeout(500);
+
+    await expect(page.getByText("Tag search parent")).toBeVisible();
+  });
+
+  test("combine priority and search filters", async ({ page }) => {
+    await createTodo(page, { title: "Combined high alpha", priority: "high" });
+    await createTodo(page, { title: "Combined low alpha", priority: "low" });
+    await createTodo(page, { title: "Combined high beta", priority: "high" });
+
+    // Set priority filter to high
+    const filterSection = page.locator("section").filter({ hasText: "Search & Filters" });
+    await filterSection.locator("select").nth(1).selectOption("high");
+
+    // Search for alpha
+    await page.getByPlaceholder("Search todos, subtasks, or tags").fill("alpha");
+    await page.waitForTimeout(500);
+
+    // Only "Combined high alpha" should be visible
+    await expect(page.getByText("Combined high alpha")).toBeVisible();
+    await expect(page.getByText("Combined low alpha")).not.toBeVisible();
+    await expect(page.getByText("Combined high beta")).not.toBeVisible();
   });
 });

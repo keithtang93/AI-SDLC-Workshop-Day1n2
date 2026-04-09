@@ -98,6 +98,22 @@ export async function createTag(
   await page.waitForTimeout(500);
 }
 
+export async function addSubtask(
+  page: Page,
+  todoTitle: string,
+  subtaskTitle: string,
+): Promise<void> {
+  page.once("dialog", async (dialog) => {
+    await dialog.accept(subtaskTitle);
+  });
+  const addBtn = page
+    .locator("article")
+    .filter({ hasText: todoTitle })
+    .getByRole("button", { name: "Add Subtask" });
+  await addBtn.click();
+  await page.waitForTimeout(500);
+}
+
 export function uniqueUser(): string {
   return `testuser_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 }

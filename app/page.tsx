@@ -43,6 +43,12 @@ interface Template {
   name: string;
   description: string | null;
   category: string | null;
+  title: string;
+  priority: Priority;
+  reminder_minutes: number | null;
+  recurrence_pattern: RecurrencePattern | null;
+  tags_json: string;
+  subtasks_json: string;
 }
 
 const reminderOptions = [
@@ -127,6 +133,8 @@ export default function HomePage() {
   const [editSelectedTags, setEditSelectedTags] = useState<number[]>([]);
 
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+  const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
+  const [importMessage, setImportMessage] = useState<string | null>(null);
 
   const { permission, requestPermission } = useNotifications();
 
@@ -195,6 +203,9 @@ export default function HomePage() {
   };
 
   const grouped = useMemo(() => {
+    const priorityOrder: Record<Priority, number> = { high: 0, medium: 1, low: 2 };
+    const sortByPriority = (a: Todo, b: Todo) => priorityOrder[a.priority] - priorityOrder[b.priority];
+
     const overdue: Todo[] = [];
     const active: Todo[] = [];
     const completed: Todo[] = [];
@@ -209,6 +220,10 @@ export default function HomePage() {
         active.push(todo);
       }
     }
+
+    overdue.sort(sortByPriority);
+    active.sort(sortByPriority);
+    completed.sort(sortByPriority);
 
     return { overdue, active, completed };
   }, [filteredTodos]);
@@ -419,11 +434,16 @@ export default function HomePage() {
     const file = event.target.files?.[0];
     if (!file) return;
     const data = JSON.parse(await file.text());
-    await fetch("/api/todos/import", {
+    const response = await fetch("/api/todos/import", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ data }),
     });
+    const result = await response.json();
+    if (response.ok && result.imported !== undefined) {
+      setImportMessage(`Successfully imported ${result.imported} todo${result.imported === 1 ? "" : "s"}`);
+      setTimeout(() => setImportMessage(null), 5000);
+    }
     event.target.value = "";
     await loadAll();
   };
@@ -467,6 +487,12 @@ export default function HomePage() {
           </button>
         </div>
       </header>
+
+      {importMessage && (
+        <div className="mb-4 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700" data-testid="import-success">
+          {importMessage}
+        </div>
+      )}
 
       <section className="mb-6 rounded-xl bg-white p-4 shadow">
         <div className="mb-3 flex items-center justify-between">
@@ -522,9 +548,11 @@ export default function HomePage() {
             <option value="yearly">Yearly</option>
           </select>
           <select
-            className="rounded border px-3 py-2"
+            className="rounded border px-3 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
             value={reminderMinutes}
             onChange={(e) => setReminderMinutes(e.target.value)}
+            disabled={!dueDate}
+            title={!dueDate ? "Set a due date first to enable reminders" : ""}
           >
             {reminderOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -605,7 +633,62 @@ export default function HomePage() {
               </option>
             ))}
           </select>
+          {templates.length > 0 && (
+            <select
+              onChange={(e) => {
+                const id = Number(e.target.value);
+                setPreviewTemplate(id ? templates.find((t) => t.id === id) ?? null : null);
+              }}
+              defaultValue=""
+              className="rounded border px-3 py-2"
+            >
+              <option value="">Preview template...</option>
+              {templates.map((template) => (
+                <option key={template.id} value={template.id}>
+                  {template.name}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
+
+        {previewTemplate && (
+          <div className="mt-3 rounded border border-slate-200 bg-slate-50 p-3" data-testid="template-preview">
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="text-sm font-semibold">Template Preview: {previewTemplate.name}</h3>
+              <button
+                onClick={() => setPreviewTemplate(null)}
+                className="rounded bg-slate-200 px-2 py-1 text-xs"
+              >
+                Close
+              </button>
+            </div>
+            <div className="grid gap-1 text-xs text-slate-600">
+              <p><span className="font-medium">Title:</span> {previewTemplate.title}</p>
+              <p><span className="font-medium">Priority:</span> {previewTemplate.priority}</p>
+              {previewTemplate.description && (
+                <p><span className="font-medium">Description:</span> {previewTemplate.description}</p>
+              )}
+              {previewTemplate.recurrence_pattern && (
+                <p><span className="font-medium">Recurrence:</span> {previewTemplate.recurrence_pattern}</p>
+              )}
+              {previewTemplate.reminder_minutes !== null && (
+                <p><span className="font-medium">Reminder:</span> {previewTemplate.reminder_minutes} minutes before</p>
+              )}
+              {(() => {
+                const subtasks = JSON.parse(previewTemplate.subtasks_json || "[]") as Array<{title: string}>;
+                return subtasks.length > 0 ? (
+                  <div>
+                    <span className="font-medium">Subtasks:</span>
+                    <ul className="ml-4 list-disc">
+                      {subtasks.map((s, i) => <li key={i}>{s.title}</li>)}
+                    </ul>
+                  </div>
+                ) : null;
+              })()}
+            </div>
+          </div>
+        )}
 
         {error && (
           <p className="mt-3 rounded bg-rose-50 p-2 text-sm text-rose-700">
@@ -995,9 +1078,11 @@ export default function HomePage() {
                 <option value="yearly">Yearly</option>
               </select>
               <select
-                className="rounded border px-3 py-2"
+                className="rounded border px-3 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 value={editReminderMinutes}
                 onChange={(e) => setEditReminderMinutes(e.target.value)}
+                disabled={!editDueDate}
+                title={!editDueDate ? "Set a due date first to enable reminders" : ""}
               >
                 {reminderOptions.map((option) => (
                   <option key={option.value} value={option.value}>

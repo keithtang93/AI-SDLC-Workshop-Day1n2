@@ -75,4 +75,28 @@ test.describe("Feature 10: Calendar View", () => {
     await expect(page).toHaveURL("/calendar");
     await expect(page.getByRole("heading", { name: "Calendar" })).toBeVisible();
   });
+
+  test("todo appears on correct date in calendar", async ({ page }) => {
+    // Create a todo with a specific future due date (15th of next month)
+    const now = new Date();
+    const targetDate = new Date(now.getFullYear(), now.getMonth() + 1, 15, 12, 0);
+    const dateStr = targetDate.toISOString().slice(0, 16);
+    const dayNum = targetDate.getDate();
+
+    await createTodo(page, {
+      title: "Calendar visible todo",
+      dueDate: dateStr,
+    });
+
+    // Navigate to calendar
+    await page.goto("/calendar");
+
+    // Navigate to the correct month
+    await page.getByRole("button", { name: "Next" }).click();
+    await page.waitForTimeout(500);
+
+    // The todo title should appear on the calendar on the 15th
+    const dayCell = page.locator(".grid-cols-7").last().locator("div").filter({ hasText: String(dayNum) });
+    await expect(dayCell.getByText("Calendar visible todo")).toBeVisible();
+  });
 });

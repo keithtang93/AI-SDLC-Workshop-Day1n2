@@ -104,4 +104,36 @@ test.describe("Feature 01: Todo CRUD Operations", () => {
     await page.waitForTimeout(500);
     await expect(page.getByPlaceholder("Title")).toHaveValue("");
   });
+
+  test("edit todo via edit modal", async ({ page }) => {
+    await createTodo(page, { title: "Editable todo item" });
+    await expect(page.getByText("Editable todo item")).toBeVisible();
+
+    const editBtn = page
+      .locator("article")
+      .filter({ hasText: "Editable todo item" })
+      .getByRole("button", { name: "Edit" });
+    await editBtn.click();
+
+    // Edit modal should appear
+    await expect(page.getByRole("heading", { name: "Edit Todo" })).toBeVisible();
+
+    // Change the title
+    const titleInput = page.locator(".fixed input").first();
+    await titleInput.fill("Updated todo item");
+    await page.getByRole("button", { name: "Save Changes" }).click();
+    await page.waitForTimeout(500);
+
+    await expect(page.getByText("Updated todo item")).toBeVisible();
+    await expect(page.getByText("Editable todo item")).not.toBeVisible();
+  });
+
+  test("past due date validation returns error", async ({ page }) => {
+    const pastDate = new Date(Date.now() - 86400000);
+    const dateStr = pastDate.toISOString().slice(0, 16);
+
+    await createTodo(page, { title: "Past date todo", dueDate: dateStr });
+
+    await expect(page.getByText(/Due date must be/)).toBeVisible();
+  });
 });

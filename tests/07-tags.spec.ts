@@ -59,4 +59,53 @@ test.describe("Feature 06: Tag System", () => {
     await createTag(page, "Clearable");
     await expect(page.getByPlaceholder("Tag name")).toHaveValue("");
   });
+
+  test("edit tag name and color", async ({ page }) => {
+    await createTag(page, "EditMe", "#FF0000");
+    await expect(page.getByRole("button", { name: "EditMe" })).toBeVisible();
+
+    // Click the edit button on the tag in the Manage Tags section
+    const tagSection = page.locator("section").filter({ hasText: "Manage Tags" });
+    const editBtn = tagSection.locator('button[title="Edit tag"]');
+    await editBtn.click();
+
+    // Edit form should appear
+    await expect(tagSection.getByText("Edit tag:")).toBeVisible();
+
+    // Change name
+    const nameInput = tagSection.locator("form").last().locator('input[placeholder="Tag name"]');
+    await nameInput.fill("Renamed");
+    await tagSection.getByRole("button", { name: "Save" }).click();
+    await page.waitForTimeout(500);
+
+    // Verify name changed
+    await expect(page.getByRole("button", { name: "Renamed" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "EditMe" })).not.toBeVisible();
+  });
+
+  test("delete tag removes it", async ({ page }) => {
+    await createTag(page, "DeleteMe", "#0000FF");
+    await expect(page.getByRole("button", { name: "DeleteMe" })).toBeVisible();
+
+    // Click the delete button on the tag
+    const tagSection = page.locator("section").filter({ hasText: "Manage Tags" });
+    const deleteBtn = tagSection.locator('button[title="Delete tag"]');
+    await deleteBtn.click();
+    await page.waitForTimeout(500);
+
+    // Tag should no longer be visible in the form tags area
+    await expect(
+      tagSection.locator("div").filter({ hasText: "DeleteMe" }).locator('button[title="Delete tag"]'),
+    ).not.toBeVisible();
+  });
+
+  test("duplicate tag name returns error via API", async ({ page }) => {
+    await createTag(page, "UniqueTag");
+
+    // Try to create the same tag again via API
+    const response = await page.request.post("/api/tags", {
+      data: { name: "UniqueTag", color: "#FF0000" },
+    });
+    expect(response.status()).toBe(409);
+  });
 });

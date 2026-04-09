@@ -1,0 +1,47 @@
+# dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# next.js
+.next/
+out/
+
+# production build
+build/
+
+# env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# database
+todos.db
+
+# testing
+test-results/
+playwright-report/
+tests/
+unit-tests/
+playwright.config.ts
+vitest.config.ts
+
+# documentation / non-runtime files
+PRPs/
+plugins/
+mcp-configs/
+*.md
+EVALUATION.md
+output.md
+LICENSE
+
+# misc
+.DS_Store
+*.tsbuildinfo
+.git/
+.github/
+.claude/
+.gitignore
+.eslintrc.json
