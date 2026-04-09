@@ -3,7 +3,7 @@ id: PRP-09
 title: Export & Import
 status: ready-for-build
 depends_on: [PRP-01, PRP-05, PRP-06]
-test_file: tests/10-export-import.spec.ts
+test_file: tests/10-export-import.spec.ts # Create if needed
 ---
 
 # PRP 09: Export & Import

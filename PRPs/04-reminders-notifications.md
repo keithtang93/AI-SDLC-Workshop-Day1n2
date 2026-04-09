@@ -3,7 +3,7 @@ id: PRP-04
 title: Reminders & Notifications
 status: ready-for-build
 depends_on: [PRP-01, PRP-03]
-test_file: tests/05-reminders-notifications.spec.ts
+test_file: tests/05-reminders-notifications.spec.ts # Create if needed
 ---
 
 # PRP 04: Reminders & Notifications

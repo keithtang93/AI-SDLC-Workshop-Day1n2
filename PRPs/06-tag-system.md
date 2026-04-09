@@ -3,7 +3,7 @@ id: PRP-06
 title: Tag System
 status: ready-for-build
 depends_on: [PRP-01]
-test_file: tests/07-tag-system.spec.ts
+test_file: tests/07-tag-system.spec.ts # Create if needed
 ---
 
 # PRP 06: Tag System

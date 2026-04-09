@@ -3,7 +3,7 @@ id: PRP-01
 title: Todo CRUD Operations
 status: ready-for-build
 depends_on: []
-test_file: tests/02-todo-crud.spec.ts
+test_file: tests/02-todo-crud.spec.ts # Create if needed
 ---
 
 # PRP 01: Todo CRUD Operations

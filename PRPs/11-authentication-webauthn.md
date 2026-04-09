@@ -3,7 +3,7 @@ id: PRP-11
 title: Authentication (WebAuthn / Passkeys)
 status: ready-for-build
 depends_on: []
-test_file: tests/01-authentication.spec.ts
+test_file: tests/01-authentication.spec.ts # Create if needed
 ---
 
 # PRP 11: Authentication (WebAuthn / Passkeys)

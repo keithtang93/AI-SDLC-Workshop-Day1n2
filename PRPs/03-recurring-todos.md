@@ -3,7 +3,7 @@ id: PRP-03
 title: Recurring Todos
 status: ready-for-build
 depends_on: [PRP-01, PRP-02]
-test_file: tests/04-recurring-todos.spec.ts
+test_file: tests/04-recurring-todos.spec.ts # Create if needed
 ---
 
 # PRP 03: Recurring Todos

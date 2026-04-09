@@ -3,7 +3,7 @@ id: PRP-05
 title: Subtasks & Progress Tracking
 status: ready-for-build
 depends_on: [PRP-01]
-test_file: tests/06-subtasks-progress.spec.ts
+test_file: tests/06-subtasks-progress.spec.ts # Create if needed
 ---
 
 # PRP 05: Subtasks & Progress Tracking

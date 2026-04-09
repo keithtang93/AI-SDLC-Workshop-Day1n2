@@ -3,7 +3,7 @@ id: PRP-02
 title: Priority System
 status: ready-for-build
 depends_on: [PRP-01]
-test_file: tests/03-priority-system.spec.ts
+test_file: tests/03-priority-system.spec.ts # Create if needed
 ---
 
 # PRP 02: Priority System

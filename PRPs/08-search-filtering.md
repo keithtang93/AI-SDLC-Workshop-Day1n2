@@ -3,7 +3,7 @@ id: PRP-08
 title: Search & Filtering
 status: ready-for-build
 depends_on: [PRP-01, PRP-02, PRP-06]
-test_file: tests/09-search-filtering.spec.ts
+test_file: tests/09-search-filtering.spec.ts # Create if needed
 ---
 
 # PRP 08: Search & Filtering

@@ -3,7 +3,7 @@ id: PRP-07
 title: Template System
 status: ready-for-build
 depends_on: [PRP-01, PRP-03, PRP-05]
-test_file: tests/08-template-system.spec.ts
+test_file: tests/08-template-system.spec.ts # Create if needed
 ---
 
 # PRP 07: Template System

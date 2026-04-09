@@ -3,7 +3,7 @@ id: PRP-10
 title: Calendar View
 status: ready-for-build
 depends_on: [PRP-01]
-test_file: tests/11-calendar-view.spec.ts
+test_file: tests/11-calendar-view.spec.ts # Create if needed
 ---
 
 # PRP 10: Calendar View

@@ -1,0 +1,29 @@
+# dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+tsconfig.tsbuildinfo
+
+# environment files
+.env.local
+.env*.local
+
+# local databases
+todos.db
+todos.db-shm
+todos.db-wal
+
+# test artifacts
+playwright-report/
+test-results/
+test-results.json
+test-*.txt
+
+# editor settings
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
