@@ -1,16 +1,16 @@
-import { defineConfig } from '@playwright/test';
+import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
-  testDir: './tests',
+  testDir: "./tests",
   timeout: 30000,
   use: {
-    baseURL: 'http://localhost:3000',
-    timezoneId: 'Asia/Singapore',
-    headless: true
+    baseURL: "http://localhost:3000",
+    timezoneId: "Asia/Singapore",
+    headless: true,
   },
   webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:3000',
-    reuseExistingServer: true
-  }
+    command: "npm run dev",
+    url: "http://localhost:3000",
+    reuseExistingServer: true,
+  },
 });

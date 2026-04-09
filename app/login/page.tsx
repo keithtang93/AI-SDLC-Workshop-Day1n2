@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { startAuthentication } from '@simplewebauthn/browser';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { FormEvent, useState } from 'react';
+import { startAuthentication } from "@simplewebauthn/browser";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { FormEvent, useState } from "react";
 
 export default function LoginPage() {
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -17,35 +17,35 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const optionsRes = await fetch('/api/auth/login-options', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username })
+      const optionsRes = await fetch("/api/auth/login-options", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username }),
       });
 
       if (!optionsRes.ok) {
         const data = await optionsRes.json();
-        throw new Error(data.error ?? 'Failed to start login');
+        throw new Error(data.error ?? "Failed to start login");
       }
 
       const options = await optionsRes.json();
       const response = await startAuthentication({ optionsJSON: options });
 
-      const verifyRes = await fetch('/api/auth/login-verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, response })
+      const verifyRes = await fetch("/api/auth/login-verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, response }),
       });
 
       if (!verifyRes.ok) {
         const data = await verifyRes.json();
-        throw new Error(data.error ?? 'Login failed');
+        throw new Error(data.error ?? "Login failed");
       }
 
-      router.push('/');
+      router.push("/");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+      setError(err instanceof Error ? err.message : "Login failed");
     } finally {
       setLoading(false);
     }
@@ -53,12 +53,19 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen grid place-items-center bg-gradient-to-br from-sky-700 to-cyan-500 p-4">
-      <form onSubmit={onSubmit} className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl space-y-4">
+      <form
+        onSubmit={onSubmit}
+        className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl space-y-4"
+      >
         <h1 className="text-2xl font-bold text-slate-900">Sign In</h1>
-        <p className="text-sm text-slate-600">Use your passkey to access your todos.</p>
+        <p className="text-sm text-slate-600">
+          Use your passkey to access your todos.
+        </p>
 
         <label className="block">
-          <span className="mb-1 block text-sm font-medium text-slate-700">Username</span>
+          <span className="mb-1 block text-sm font-medium text-slate-700">
+            Username
+          </span>
           <input
             value={username}
             onChange={(e) => setUsername(e.target.value)}
@@ -68,19 +75,26 @@ export default function LoginPage() {
           />
         </label>
 
-        {error && <p className="rounded bg-rose-50 p-2 text-sm text-rose-700">{error}</p>}
+        {error && (
+          <p className="rounded bg-rose-50 p-2 text-sm text-rose-700">
+            {error}
+          </p>
+        )}
 
         <button
           type="submit"
           disabled={loading}
           className="w-full rounded-lg bg-slate-900 px-4 py-2 font-medium text-white hover:bg-slate-700 disabled:opacity-50"
         >
-          {loading ? 'Signing in...' : 'Sign In with Passkey'}
+          {loading ? "Signing in..." : "Sign In with Passkey"}
         </button>
 
         <p className="text-sm text-slate-600">
-          New here?{' '}
-          <Link href="/register" className="font-medium text-sky-700 hover:underline">
+          New here?{" "}
+          <Link
+            href="/register"
+            className="font-medium text-sky-700 hover:underline"
+          >
             Create account
           </Link>
         </p>

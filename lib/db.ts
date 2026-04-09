@@ -1,13 +1,13 @@
-import Database from 'better-sqlite3';
-import path from 'node:path';
-import { getSingaporeNow } from '@/lib/timezone';
+import Database from "better-sqlite3";
+import path from "node:path";
+import { getSingaporeNow } from "@/lib/timezone";
 
-const dbPath = path.join(process.cwd(), 'todos.db');
+const dbPath = path.join(process.cwd(), "todos.db");
 const db = new Database(dbPath);
-db.pragma('foreign_keys = ON');
+db.pragma("foreign_keys = ON");
 
-export type Priority = 'high' | 'medium' | 'low';
-export type RecurrencePattern = 'daily' | 'weekly' | 'monthly' | 'yearly';
+export type Priority = "high" | "medium" | "low";
+export type RecurrencePattern = "daily" | "weekly" | "monthly" | "yearly";
 
 export interface User {
   id: number;
@@ -173,12 +173,14 @@ function withTodoRelations(todo: Todo): Todo {
       `SELECT t.* FROM tags t
        INNER JOIN todo_tags tt ON tt.tag_id = t.id
        WHERE tt.todo_id = ?
-       ORDER BY t.name ASC`
+       ORDER BY t.name ASC`,
     )
     .all(todo.id) as Tag[];
 
   const subtasks = db
-    .prepare(`SELECT * FROM subtasks WHERE todo_id = ? ORDER BY position ASC, id ASC`)
+    .prepare(
+      `SELECT * FROM subtasks WHERE todo_id = ? ORDER BY position ASC, id ASC`,
+    )
     .all(todo.id) as Subtask[];
 
   return { ...todo, tags, subtasks };
@@ -186,15 +188,21 @@ function withTodoRelations(todo: Todo): Todo {
 
 export const userDB = {
   create(username: string): User {
-    const result = db.prepare('INSERT INTO users (username) VALUES (?)').run(username.trim());
+    const result = db
+      .prepare("INSERT INTO users (username) VALUES (?)")
+      .run(username.trim());
     return this.findById(Number(result.lastInsertRowid)) as User;
   },
   findByUsername(username: string): User | undefined {
-    return db.prepare('SELECT * FROM users WHERE username = ?').get(username.trim()) as User | undefined;
+    return db
+      .prepare("SELECT * FROM users WHERE username = ?")
+      .get(username.trim()) as User | undefined;
   },
   findById(id: number): User | undefined {
-    return db.prepare('SELECT * FROM users WHERE id = ?').get(id) as User | undefined;
-  }
+    return db.prepare("SELECT * FROM users WHERE id = ?").get(id) as
+      | User
+      | undefined;
+  },
 };
 
 export const authenticatorDB = {
@@ -209,26 +217,34 @@ export const authenticatorDB = {
       .prepare(
         `INSERT INTO authenticators
          (user_id, credential_id, public_key, sign_count, transports)
-         VALUES (?, ?, ?, ?, ?)`
+         VALUES (?, ?, ?, ?, ?)`,
       )
       .run(
         input.userId,
         input.credentialId,
         input.publicKey,
         input.signCount ?? 0,
-        JSON.stringify(input.transports ?? [])
+        JSON.stringify(input.transports ?? []),
       );
-    return db.prepare('SELECT * FROM authenticators WHERE id = ?').get(result.lastInsertRowid) as Authenticator;
+    return db
+      .prepare("SELECT * FROM authenticators WHERE id = ?")
+      .get(result.lastInsertRowid) as Authenticator;
   },
   findByCredentialId(credentialId: string): Authenticator | undefined {
-    return db.prepare('SELECT * FROM authenticators WHERE credential_id = ?').get(credentialId) as Authenticator | undefined;
+    return db
+      .prepare("SELECT * FROM authenticators WHERE credential_id = ?")
+      .get(credentialId) as Authenticator | undefined;
   },
   findByUserId(userId: number): Authenticator[] {
-    return db.prepare('SELECT * FROM authenticators WHERE user_id = ?').all(userId) as Authenticator[];
+    return db
+      .prepare("SELECT * FROM authenticators WHERE user_id = ?")
+      .all(userId) as Authenticator[];
   },
   updateCounter(id: number, signCount: number): void {
-    db.prepare('UPDATE authenticators SET sign_count = ?, last_used = CURRENT_TIMESTAMP WHERE id = ?').run(signCount ?? 0, id);
-  }
+    db.prepare(
+      "UPDATE authenticators SET sign_count = ?, last_used = CURRENT_TIMESTAMP WHERE id = ?",
+    ).run(signCount ?? 0, id);
+  },
 };
 
 export const todoDB = {
@@ -246,24 +262,28 @@ export const todoDB = {
       .prepare(
         `INSERT INTO todos
          (user_id, title, description, priority, due_date, reminder_minutes, recurrence_pattern)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         input.userId,
         input.title.trim(),
         input.description ?? null,
-        input.priority ?? 'medium',
+        input.priority ?? "medium",
         input.dueDate ?? null,
         input.reminderMinutes ?? null,
-        input.recurrencePattern ?? null
+        input.recurrencePattern ?? null,
       );
 
     const todoId = Number(result.lastInsertRowid);
     for (const tagId of input.tagIds ?? []) {
-      db.prepare('INSERT OR IGNORE INTO todo_tags (todo_id, tag_id) VALUES (?, ?)').run(todoId, tagId);
+      db.prepare(
+        "INSERT OR IGNORE INTO todo_tags (todo_id, tag_id) VALUES (?, ?)",
+      ).run(todoId, tagId);
     }
 
-    const todo = db.prepare('SELECT * FROM todos WHERE id = ?').get(todoId) as Todo;
+    const todo = db
+      .prepare("SELECT * FROM todos WHERE id = ?")
+      .get(todoId) as Todo;
     return withTodoRelations(todo);
   },
 
@@ -276,7 +296,7 @@ export const todoDB = {
           CASE priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END,
           due_date IS NULL,
           due_date ASC,
-          created_at DESC`
+          created_at DESC`,
       )
       .all(userId) as Todo[];
 
@@ -284,7 +304,9 @@ export const todoDB = {
   },
 
   getById(userId: number, id: number): Todo | undefined {
-    const row = db.prepare('SELECT * FROM todos WHERE id = ? AND user_id = ?').get(id, userId) as Todo | undefined;
+    const row = db
+      .prepare("SELECT * FROM todos WHERE id = ? AND user_id = ?")
+      .get(id, userId) as Todo | undefined;
     return row ? withTodoRelations(row) : undefined;
   },
 
@@ -301,9 +323,11 @@ export const todoDB = {
       recurrencePattern: RecurrencePattern | null;
       lastNotificationSent: string | null;
       tagIds: number[];
-    }>
+    }>,
   ): Todo | undefined {
-    const existing = db.prepare('SELECT * FROM todos WHERE id = ? AND user_id = ?').get(id, userId) as Todo | undefined;
+    const existing = db
+      .prepare("SELECT * FROM todos WHERE id = ? AND user_id = ?")
+      .get(id, userId) as Todo | undefined;
     if (!existing) {
       return undefined;
     }
@@ -313,13 +337,17 @@ export const todoDB = {
        SET title = ?, description = ?, priority = ?, due_date = ?,
            completed = ?, completed_at = ?, reminder_minutes = ?, recurrence_pattern = ?,
            last_notification_sent = ?, updated_at = CURRENT_TIMESTAMP
-       WHERE id = ? AND user_id = ?`
+       WHERE id = ? AND user_id = ?`,
     ).run(
       input.title ?? existing.title,
       input.description ?? existing.description,
       input.priority ?? existing.priority,
       input.dueDate ?? existing.due_date,
-      input.completed === undefined ? existing.completed : input.completed ? 1 : 0,
+      input.completed === undefined
+        ? existing.completed
+        : input.completed
+          ? 1
+          : 0,
       input.completed === undefined
         ? existing.completed_at
         : input.completed
@@ -329,13 +357,15 @@ export const todoDB = {
       input.recurrencePattern ?? existing.recurrence_pattern,
       input.lastNotificationSent ?? existing.last_notification_sent,
       id,
-      userId
+      userId,
     );
 
     if (input.tagIds) {
-      db.prepare('DELETE FROM todo_tags WHERE todo_id = ?').run(id);
+      db.prepare("DELETE FROM todo_tags WHERE todo_id = ?").run(id);
       for (const tagId of input.tagIds) {
-        db.prepare('INSERT OR IGNORE INTO todo_tags (todo_id, tag_id) VALUES (?, ?)').run(id, tagId);
+        db.prepare(
+          "INSERT OR IGNORE INTO todo_tags (todo_id, tag_id) VALUES (?, ?)",
+        ).run(id, tagId);
       }
     }
 
@@ -343,7 +373,10 @@ export const todoDB = {
   },
 
   delete(userId: number, id: number): void {
-    db.prepare('DELETE FROM todos WHERE id = ? AND user_id = ?').run(id, userId);
+    db.prepare("DELETE FROM todos WHERE id = ? AND user_id = ?").run(
+      id,
+      userId,
+    );
   },
 
   listDueForNotification(userId: number): Todo[] {
@@ -353,67 +386,95 @@ export const todoDB = {
          WHERE user_id = ?
            AND completed = 0
            AND due_date IS NOT NULL
-           AND reminder_minutes IS NOT NULL`
+           AND reminder_minutes IS NOT NULL`,
       )
       .all(userId) as Todo[];
     return rows.map(withTodoRelations);
-  }
+  },
 };
 
 export const subtaskDB = {
   create(todoId: number, title: string): Subtask {
-    const max = db.prepare('SELECT COALESCE(MAX(position), -1) as value FROM subtasks WHERE todo_id = ?').get(todoId) as {
+    const max = db
+      .prepare(
+        "SELECT COALESCE(MAX(position), -1) as value FROM subtasks WHERE todo_id = ?",
+      )
+      .get(todoId) as {
       value: number;
     };
     const result = db
-      .prepare('INSERT INTO subtasks (todo_id, title, position) VALUES (?, ?, ?)')
+      .prepare(
+        "INSERT INTO subtasks (todo_id, title, position) VALUES (?, ?, ?)",
+      )
       .run(todoId, title.trim(), max.value + 1);
-    return db.prepare('SELECT * FROM subtasks WHERE id = ?').get(result.lastInsertRowid) as Subtask;
+    return db
+      .prepare("SELECT * FROM subtasks WHERE id = ?")
+      .get(result.lastInsertRowid) as Subtask;
   },
-  update(id: number, input: Partial<{ title: string; completed: boolean }>): Subtask | undefined {
-    const current = db.prepare('SELECT * FROM subtasks WHERE id = ?').get(id) as Subtask | undefined;
+  update(
+    id: number,
+    input: Partial<{ title: string; completed: boolean }>,
+  ): Subtask | undefined {
+    const current = db
+      .prepare("SELECT * FROM subtasks WHERE id = ?")
+      .get(id) as Subtask | undefined;
     if (!current) {
       return undefined;
     }
-    db.prepare('UPDATE subtasks SET title = ?, completed = ? WHERE id = ?').run(
+    db.prepare("UPDATE subtasks SET title = ?, completed = ? WHERE id = ?").run(
       input.title ?? current.title,
-      input.completed === undefined ? current.completed : input.completed ? 1 : 0,
-      id
+      input.completed === undefined
+        ? current.completed
+        : input.completed
+          ? 1
+          : 0,
+      id,
     );
-    return db.prepare('SELECT * FROM subtasks WHERE id = ?').get(id) as Subtask;
+    return db.prepare("SELECT * FROM subtasks WHERE id = ?").get(id) as Subtask;
   },
   delete(id: number): void {
-    db.prepare('DELETE FROM subtasks WHERE id = ?').run(id);
-  }
+    db.prepare("DELETE FROM subtasks WHERE id = ?").run(id);
+  },
 };
 
 export const tagDB = {
   create(userId: number, name: string, color: string): Tag {
-    const result = db.prepare('INSERT INTO tags (user_id, name, color) VALUES (?, ?, ?)').run(userId, name.trim(), color);
-    return db.prepare('SELECT * FROM tags WHERE id = ?').get(result.lastInsertRowid) as Tag;
+    const result = db
+      .prepare("INSERT INTO tags (user_id, name, color) VALUES (?, ?, ?)")
+      .run(userId, name.trim(), color);
+    return db
+      .prepare("SELECT * FROM tags WHERE id = ?")
+      .get(result.lastInsertRowid) as Tag;
   },
   listByUserId(userId: number): Tag[] {
-    return db.prepare('SELECT * FROM tags WHERE user_id = ? ORDER BY name ASC').all(userId) as Tag[];
+    return db
+      .prepare("SELECT * FROM tags WHERE user_id = ? ORDER BY name ASC")
+      .all(userId) as Tag[];
   },
   getByName(userId: number, name: string): Tag | undefined {
-    return db.prepare('SELECT * FROM tags WHERE user_id = ? AND name = ?').get(userId, name.trim()) as Tag | undefined;
+    return db
+      .prepare("SELECT * FROM tags WHERE user_id = ? AND name = ?")
+      .get(userId, name.trim()) as Tag | undefined;
   },
-  update(userId: number, id: number, input: Partial<{ name: string; color: string }>): Tag | undefined {
-    const current = db.prepare('SELECT * FROM tags WHERE id = ? AND user_id = ?').get(id, userId) as Tag | undefined;
+  update(
+    userId: number,
+    id: number,
+    input: Partial<{ name: string; color: string }>,
+  ): Tag | undefined {
+    const current = db
+      .prepare("SELECT * FROM tags WHERE id = ? AND user_id = ?")
+      .get(id, userId) as Tag | undefined;
     if (!current) {
       return undefined;
     }
-    db.prepare('UPDATE tags SET name = ?, color = ? WHERE id = ? AND user_id = ?').run(
-      input.name ?? current.name,
-      input.color ?? current.color,
-      id,
-      userId
-    );
-    return db.prepare('SELECT * FROM tags WHERE id = ?').get(id) as Tag;
+    db.prepare(
+      "UPDATE tags SET name = ?, color = ? WHERE id = ? AND user_id = ?",
+    ).run(input.name ?? current.name, input.color ?? current.color, id, userId);
+    return db.prepare("SELECT * FROM tags WHERE id = ?").get(id) as Tag;
   },
   delete(userId: number, id: number): void {
-    db.prepare('DELETE FROM tags WHERE id = ? AND user_id = ?').run(id, userId);
-  }
+    db.prepare("DELETE FROM tags WHERE id = ? AND user_id = ?").run(id, userId);
+  },
 };
 
 export const templateDB = {
@@ -429,13 +490,13 @@ export const templateDB = {
       recurrencePattern?: RecurrencePattern | null;
       tagsJson?: string;
       subtasksJson?: string;
-    }
+    },
   ): Template {
     const result = db
       .prepare(
         `INSERT INTO templates
          (user_id, name, category, title, description, priority, reminder_minutes, recurrence_pattern, tags_json, subtasks_json)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         userId,
@@ -443,34 +504,52 @@ export const templateDB = {
         input.category ?? null,
         input.title.trim(),
         input.description ?? null,
-        input.priority ?? 'medium',
+        input.priority ?? "medium",
         input.reminderMinutes ?? null,
         input.recurrencePattern ?? null,
-        input.tagsJson ?? '[]',
-        input.subtasksJson ?? '[]'
+        input.tagsJson ?? "[]",
+        input.subtasksJson ?? "[]",
       );
-    return db.prepare('SELECT * FROM templates WHERE id = ?').get(result.lastInsertRowid) as Template;
+    return db
+      .prepare("SELECT * FROM templates WHERE id = ?")
+      .get(result.lastInsertRowid) as Template;
   },
   listByUserId(userId: number): Template[] {
-    return db.prepare('SELECT * FROM templates WHERE user_id = ? ORDER BY name ASC').all(userId) as Template[];
+    return db
+      .prepare("SELECT * FROM templates WHERE user_id = ? ORDER BY name ASC")
+      .all(userId) as Template[];
   },
   getById(userId: number, id: number): Template | undefined {
-    return db.prepare('SELECT * FROM templates WHERE id = ? AND user_id = ?').get(id, userId) as Template | undefined;
+    return db
+      .prepare("SELECT * FROM templates WHERE id = ? AND user_id = ?")
+      .get(id, userId) as Template | undefined;
   },
   delete(userId: number, id: number): void {
-    db.prepare('DELETE FROM templates WHERE id = ? AND user_id = ?').run(id, userId);
-  }
+    db.prepare("DELETE FROM templates WHERE id = ? AND user_id = ?").run(
+      id,
+      userId,
+    );
+  },
 };
 
 export const holidayDB = {
   upsert(date: string, name: string): void {
-    db.prepare('INSERT INTO holidays (date, name) VALUES (?, ?) ON CONFLICT(date) DO UPDATE SET name = excluded.name').run(date, name);
+    db.prepare(
+      "INSERT INTO holidays (date, name) VALUES (?, ?) ON CONFLICT(date) DO UPDATE SET name = excluded.name",
+    ).run(date, name);
   },
-  listByRange(startDate: string, endDate: string): { id: number; date: string; name: string }[] {
-    return db.prepare('SELECT * FROM holidays WHERE date BETWEEN ? AND ? ORDER BY date ASC').all(startDate, endDate) as {
+  listByRange(
+    startDate: string,
+    endDate: string,
+  ): { id: number; date: string; name: string }[] {
+    return db
+      .prepare(
+        "SELECT * FROM holidays WHERE date BETWEEN ? AND ? ORDER BY date ASC",
+      )
+      .all(startDate, endDate) as {
       id: number;
       date: string;
       name: string;
     }[];
-  }
+  },
 };

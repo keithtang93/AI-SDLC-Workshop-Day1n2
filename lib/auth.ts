@@ -1,28 +1,33 @@
-import { cookies } from 'next/headers';
-import { jwtVerify, SignJWT } from 'jose';
+import { cookies } from "next/headers";
+import { jwtVerify, SignJWT } from "jose";
 
-const COOKIE_NAME = 'session-token';
-const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'dev-secret-change-me');
+const COOKIE_NAME = "session-token";
+const secret = new TextEncoder().encode(
+  process.env.JWT_SECRET || "dev-secret-change-me",
+);
 
 export interface Session {
   userId: number;
   username: string;
 }
 
-export async function createSession(userId: number, username: string): Promise<void> {
+export async function createSession(
+  userId: number,
+  username: string,
+): Promise<void> {
   const token = await new SignJWT({ userId, username })
-    .setProtectedHeader({ alg: 'HS256' })
+    .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime('7d')
+    .setExpirationTime("7d")
     .sign(secret);
 
   const store = await cookies();
   store.set(COOKIE_NAME, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    path: '/',
-    maxAge: 60 * 60 * 24 * 7
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7,
   });
 }
 
@@ -42,7 +47,7 @@ export async function getSession(): Promise<Session | null> {
 
     return {
       userId: payload.userId,
-      username: payload.username
+      username: payload.username,
     };
   } catch {
     return null;

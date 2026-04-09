@@ -1,13 +1,14 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export function useNotifications() {
-  const [permission, setPermission] = useState<NotificationPermission>('default');
+  const [permission, setPermission] =
+    useState<NotificationPermission>("default");
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const requestPermission = useCallback(async () => {
-    if (typeof window === 'undefined' || !('Notification' in window)) {
+    if (typeof window === "undefined" || !("Notification" in window)) {
       return;
     }
 
@@ -16,13 +17,13 @@ export function useNotifications() {
   }, []);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'Notification' in window) {
+    if (typeof window !== "undefined" && "Notification" in window) {
       setPermission(Notification.permission);
     }
   }, []);
 
   useEffect(() => {
-    if (permission !== 'granted') {
+    if (permission !== "granted") {
       if (timerRef.current) {
         clearInterval(timerRef.current);
         timerRef.current = null;
@@ -31,15 +32,17 @@ export function useNotifications() {
     }
 
     const poll = async () => {
-      const response = await fetch('/api/notifications/check');
+      const response = await fetch("/api/notifications/check");
       if (!response.ok) {
         return;
       }
       const data = await response.json();
       for (const item of data.notifications ?? []) {
         new Notification(`Reminder: ${item.title}`, {
-          body: item.due_date ? `Due at ${new Date(item.due_date).toLocaleString()}` : 'Upcoming task due',
-          tag: `todo-${item.id}`
+          body: item.due_date
+            ? `Due at ${new Date(item.due_date).toLocaleString()}`
+            : "Upcoming task due",
+          tag: `todo-${item.id}`,
         });
       }
     };
@@ -56,6 +59,6 @@ export function useNotifications() {
 
   return {
     permission,
-    requestPermission
+    requestPermission,
   };
 }

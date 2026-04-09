@@ -1,17 +1,26 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getSession } from '@/lib/auth';
-import { Priority, RecurrencePattern, subtaskDB, tagDB, todoDB } from '@/lib/db';
+import { NextRequest, NextResponse } from "next/server";
+import { getSession } from "@/lib/auth";
+import {
+  Priority,
+  RecurrencePattern,
+  subtaskDB,
+  tagDB,
+  todoDB,
+} from "@/lib/db";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const session = await getSession();
   if (!session) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
   const body = await request.json();
   const data = body?.data;
   if (!data || !Array.isArray(data.todos)) {
-    return NextResponse.json({ error: 'Invalid import payload' }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid import payload" },
+      { status: 400 },
+    );
   }
 
   const localTags = tagDB.listByUserId(session.userId);
@@ -22,7 +31,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   for (const importTag of data.tags ?? []) {
     if (!tagMap.has(importTag.name)) {
-      const created = tagDB.create(session.userId, importTag.name, importTag.color || '#3B82F6');
+      const created = tagDB.create(
+        session.userId,
+        importTag.name,
+        importTag.color || "#3B82F6",
+      );
       tagMap.set(created.name, created.id);
     }
   }
@@ -33,13 +46,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       userId: session.userId,
       title: sourceTodo.title,
       description: sourceTodo.description ?? null,
-      priority: (sourceTodo.priority ?? 'medium') as Priority,
+      priority: (sourceTodo.priority ?? "medium") as Priority,
       dueDate: sourceTodo.due_date ?? null,
       reminderMinutes: sourceTodo.reminder_minutes ?? null,
-      recurrencePattern: (sourceTodo.recurrence_pattern ?? null) as RecurrencePattern | null,
+      recurrencePattern: (sourceTodo.recurrence_pattern ??
+        null) as RecurrencePattern | null,
       tagIds: (sourceTodo.tags ?? [])
         .map((tag: any) => tagMap.get(tag.name))
-        .filter((id: number | undefined): id is number => typeof id === 'number')
+        .filter(
+          (id: number | undefined): id is number => typeof id === "number",
+        ),
     });
 
     for (const subtask of sourceTodo.subtasks ?? []) {
