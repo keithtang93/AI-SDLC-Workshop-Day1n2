@@ -1,5 +1,5 @@
 # ---- Stage 1: Build the application ----
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 RUN apk add --no-cache python3 make g++ libc6-compat
 WORKDIR /app
 # Copy package.json only (no lockfile) so npm resolves platform-native
@@ -10,8 +10,8 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
-# ---- Stage 3: Production image ----
-FROM node:18-alpine AS runner
+# ---- Stage 2: Production image ----
+FROM node:20-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
